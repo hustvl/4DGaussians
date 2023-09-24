@@ -24,14 +24,14 @@ class Scene:
 
     gaussians : GaussianModel
 
-    def __init__(self, args : ModelParams, gaussians : GaussianModel, load_iteration=None, shuffle=True, resolution_scales=[1.0]):
+    def __init__(self, args : ModelParams, gaussians : GaussianModel, load_iteration=None, shuffle=True, resolution_scales=[1.0], load_coarse=False):
         """b
         :param path: Path to colmap scene main folder.
         """
         self.model_path = args.model_path
         self.loaded_iter = None
         self.gaussians = gaussians
-
+        
         if load_iteration:
             if load_iteration == -1:
                 self.loaded_iter = searchForMaxIteration(os.path.join(self.model_path, "point_cloud"))
@@ -48,9 +48,9 @@ class Scene:
             print("Found transforms_train.json file, assuming Blender data set!")
             scene_info = sceneLoadTypeCallbacks["Blender"](args.source_path, args.white_background, args.eval)
         elif os.path.exists(os.path.join(args.source_path, "poses_bounds.npy")):
-            scene_info = sceneLoadTypeCallbacks["3dvideo"](args.source_path, args.white_background, args.eval)
+            scene_info = sceneLoadTypeCallbacks["dynerf"](args.source_path, args.white_background, args.eval)
         elif os.path.exists(os.path.join(args.source_path,"dataset.json")):
-            scene_info = sceneLoadTypeCallbacks["hyper"](args.source_path, args.white_background, args.eval)
+            scene_info = sceneLoadTypeCallbacks["nerfies"](args.source_path, False, args.eval)
         else:
             assert False, "Could not recognize scene type!"
         self.maxtime = scene_info.maxtime
@@ -99,11 +99,25 @@ class Scene:
                                                     "point_cloud",
                                                     "iteration_" + str(self.loaded_iter),
                                                    ))
+        # elif load_coarse:
+        #     self.gaussians.load_ply(os.path.join(self.model_path,
+        #                                                    "point_cloud",
+        #                                                    "coarse_iteration_" + str(load_coarse),
+        #                                                    "point_cloud.ply"))
+        #     self.gaussians.load_model(os.path.join(self.model_path,
+        #                                             "point_cloud",
+        #                                             "coarse_iteration_" + str(load_coarse),
+        #                                            ))
+        #     print("load coarse stage gaussians")
         else:
             self.gaussians.create_from_pcd(scene_info.point_cloud, self.cameras_extent, self.maxtime)
 
-    def save(self, iteration):
-        point_cloud_path = os.path.join(self.model_path, "point_cloud/iteration_{}".format(iteration))
+    def save(self, iteration, stage):
+        if stage == "coarse":
+            point_cloud_path = os.path.join(self.model_path, "point_cloud/coarse_iteration_{}".format(iteration))
+
+        else:
+            point_cloud_path = os.path.join(self.model_path, "point_cloud/iteration_{}".format(iteration))
         self.gaussians.save_ply(os.path.join(point_cloud_path, "point_cloud.ply"))
         self.gaussians.save_deformation(point_cloud_path)
     def getTrainCameras(self, scale=1.0):

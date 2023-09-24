@@ -16,7 +16,7 @@ from math import exp
 import lpips
 def lpips_loss(img1, img2, lpips_model):
     loss = lpips_model(img1,img2)
-    return loss
+    return loss.mean()
 def l1_loss(network_output, gt):
     return torch.abs((network_output - gt)).mean()
 

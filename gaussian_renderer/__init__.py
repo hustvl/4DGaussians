@@ -15,7 +15,7 @@ from diff_gaussian_rasterization import GaussianRasterizationSettings, GaussianR
 from scene.gaussian_model import GaussianModel
 from utils.sh_utils import eval_sh
 
-def render(viewpoint_camera, pc : GaussianModel, pipe, bg_color : torch.Tensor, scaling_modifier = 1.0, override_color = None, stage="fine"):
+def render(viewpoint_camera, pc : GaussianModel, pipe, bg_color : torch.Tensor, scaling_modifier = 1.0, override_color = None, stage="fine", res=1):
     """
     Render the scene. 
     
@@ -46,7 +46,7 @@ def render(viewpoint_camera, pc : GaussianModel, pipe, bg_color : torch.Tensor, 
         sh_degree=pc.active_sh_degree,
         campos=viewpoint_camera.camera_center.cuda(),
         prefiltered=False,
-        debug=pipe.debug
+        # debug=pipe.debug
     )
 
     rasterizer = GaussianRasterizer(raster_settings=raster_settings)
@@ -70,10 +70,10 @@ def render(viewpoint_camera, pc : GaussianModel, pipe, bg_color : torch.Tensor, 
         scales = pc._scaling
         rotations = pc._rotation
     deformation_point = pc._deformation_table
-    if stage == "coarse":
-        means3D_deform, scales_deform, rotations_deform = means3D, scales, rotations
+    if stage == "coarse" :
+        means3D_deform, scales_deform, rotations_deform, opacity_deform = means3D, scales, rotations, opacity
     else:
-        means3D_deform, scales_deform, rotations_deform, _ = pc._deformation(means3D[deformation_point], scales[deformation_point], 
+        means3D_deform, scales_deform, rotations_deform, opacity_deform = pc._deformation(means3D[deformation_point], scales[deformation_point], 
                                                                          rotations[deformation_point], opacity[deformation_point],
                                                                          time[deformation_point])
     # print(time.max())
@@ -83,15 +83,15 @@ def render(viewpoint_camera, pc : GaussianModel, pipe, bg_color : torch.Tensor, 
     means3D_final = torch.zeros_like(means3D)
     rotations_final = torch.zeros_like(rotations)
     scales_final = torch.zeros_like(scales)
-    # opacity_final = torch.zeros_like(opacity)
+    opacity_final = torch.zeros_like(opacity)
     means3D_final[deformation_point] =  means3D_deform
     rotations_final[deformation_point] =  rotations_deform
     scales_final[deformation_point] =  scales_deform
-    # opacity_final[deformation_point] = opacity_deform
+    opacity_final[deformation_point] = opacity_deform
     means3D_final[~deformation_point] = means3D[~deformation_point]
     rotations_final[~deformation_point] = rotations[~deformation_point]
     scales_final[~deformation_point] = scales[~deformation_point]
-    # opacity_final[~deformation_point] = opacity[~deformation_point]
+    opacity_final[~deformation_point] = opacity[~deformation_point]
     # means3D_final,rotations_final, scales_final = torch.zeros_like(means3D), torch.zeros_like(rotations), torch.zeros_like(scales)
     # deformation_mask = pc._deformation_table
     # means3D_deform, scales_deform, rotations_deform, opacity_deform = pc._deformation(means3D, scales,
@@ -123,7 +123,7 @@ def render(viewpoint_camera, pc : GaussianModel, pipe, bg_color : torch.Tensor, 
         colors_precomp = override_color
 
     # Rasterize visible Gaussians to image, obtain their radii (on screen). 
-    rendered_image, radii = rasterizer(
+    rendered_image, radii, depth = rasterizer(
         means3D = means3D_final,
         means2D = means2D,
         shs = shs,
@@ -138,7 +138,8 @@ def render(viewpoint_camera, pc : GaussianModel, pipe, bg_color : torch.Tensor, 
     return {"render": rendered_image,
             "viewspace_points": screenspace_points,
             "visibility_filter" : radii > 0,
-            "radii": radii}
+            "radii": radii,
+            "depth": depth}
 
 
 def render_batch(viewpoint_cameras, pc : GaussianModel, pipe, bg_color : torch.Tensor, scaling_modifier = 1.0, override_color = None, stage="fine"):
@@ -172,7 +173,7 @@ def render_batch(viewpoint_cameras, pc : GaussianModel, pipe, bg_color : torch.T
         scales = pc._scaling
         rotations = pc._rotation
     deformation_point = pc._deformation_table
-    if stage == "coarse":
+    if stage == "coarse" or viewpoint_camera == 0:
         means3D_deform, scales_deform, rotations_deform = means3D, scales, rotations
     else:
         means3D_deform, scales_deform, rotations_deform, _ = pc._deformation(means3D[deformation_point], scales[deformation_point], 
@@ -203,6 +204,7 @@ def render_batch(viewpoint_cameras, pc : GaussianModel, pipe, bg_color : torch.T
     render_image_list = []
     screenspace_points_list = []
     radii_list = []
+    depth_list = []
     visibility_fliter_list = []
     for viewpoint_camera in viewpoint_cameras:
         raster_settings = GaussianRasterizationSettings(
@@ -244,15 +246,17 @@ def render_batch(viewpoint_cameras, pc : GaussianModel, pipe, bg_color : torch.T
             colors_precomp = override_color
 
         # Rasterize visible Gaussians to image, obtain their radii (on screen). 
-        rendered_image, radii = rasterizer(
-            means3D = means3D_final,
+        # scales_final *= res
+        rendered_image, radii, depth = rasterizer(
+            means3D = means3D,
             means2D = means2D,
             shs = shs,
             colors_precomp = colors_precomp,
             opacities = opacity,
-            scales = scales_final,
-            rotations = rotations_final,
+            scales = scales,
+            rotations = rotations,
             cov3D_precomp = cov3D_precomp)
+
 
         # Those Gaussians that were frustum culled or had a radius of 0 were not visible.
         # They will be excluded from value updates used in the splitting criteria.
@@ -261,6 +265,7 @@ def render_batch(viewpoint_cameras, pc : GaussianModel, pipe, bg_color : torch.T
         # screenspace_points_list.append(screenspace_points.unsqueeze(0))
         visibility_fliter_list.append(fliter.unsqueeze(0))
         radii_list.append(radii.unsqueeze(0))
+        depth_list.append(depth.unsqueeze(0))
     render_image_list = torch.cat(render_image_list,0)
     # screenspace_points_list = torch.cat(screenspace_points_list,0)
     visibility_fliter_list = torch.cat(visibility_fliter_list,0)
@@ -268,4 +273,5 @@ def render_batch(viewpoint_cameras, pc : GaussianModel, pipe, bg_color : torch.T
     return {"render": render_image_list,
             "viewspace_points": screenspace_points,
             "visibility_filter" :visibility_fliter_list,
-            "radii": radii_list}
+            "radii": radii_list,
+            "depth": depth_list}

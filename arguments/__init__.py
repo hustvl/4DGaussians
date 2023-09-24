@@ -67,15 +67,40 @@ class PipelineParams(ParamGroup):
         self.compute_cov3D_python = False
         self.debug = False
         super().__init__(parser, "Pipeline Parameters")
+class ModelHiddenParams(ParamGroup):
+    def __init__(self, parser):
+        self.net_width = 64
+        self.timebase_pe = 4
+        self.defor_depth = 1
+        self.posebase_pe = 10
+        self.scale_rotation_pe = 2
+        self.opacity_pe = 2
+        self.timenet_width = 64
+        self.timenet_output = 32
+        self.bounds = 3
+        self.plane_tv_weight = 0.0001
+        self.time_smoothness_weight = 0.01
+        self.l1_time_planes = 0.0001
+        self.kplanes_config = {
+                             'grid_dimensions': 2,
+                             'input_coordinate_dim': 4,
+                             'output_coordinate_dim': 32,
+                             'resolution': [64, 64, 64, 25]
+                            }
+        self.multires = [1, 2, 4, 8]
 
+        
+        super().__init__(parser, "ModelHiddenParams")
+        
 class OptimizationParams(ParamGroup):
     def __init__(self, parser):
+        self.dataloader=False
         self.iterations = 30_000
-        self.coarse_iterations = 15_000
+        self.coarse_iterations = 3000
         self.position_lr_init = 0.00016
         self.position_lr_final = 0.0000016
         self.position_lr_delay_mult = 0.01
-        self.position_lr_max_steps = 30_000
+        self.position_lr_max_steps = 20_000
         self.deformation_lr_init = 0.00016
         self.deformation_lr_final = 0.000016
         self.deformation_lr_delay_mult = 0.01
@@ -88,19 +113,21 @@ class OptimizationParams(ParamGroup):
         self.rotation_lr = 0.001
         self.percent_dense = 0.01
         self.lambda_dssim = 0.2
-        self.weight_constraint_init= 0.2
-        self.weight_constraint_after = 0
-        self.weight_decay_iteration = 7000
+        self.weight_constraint_init= 1
+        self.weight_constraint_after = 0.2
+        self.weight_decay_iteration = 5000
         self.opacity_reset_interval = 3000
         self.densification_interval = 100
         self.densify_from_iter = 500
-        self.densify_until_iter = 25_000
-        self.densify_grad_threshold = 0.0005
+        self.densify_until_iter = 15_000
+        self.densify_grad_threshold_coarse = 0.0002
+        self.densify_grad_threshold_fine_init = 0.0002
         self.densify_grad_threshold_after = 0.0002
         self.pruning_from_iter = 500
         self.pruning_interval = 100
-        self.opacity_threshold = 0.005
-        self.opacity_threshold_after = 0.005
+        self.opacity_threshold_coarse = 0.005
+        self.opacity_threshold_fine_init = 0.005
+        self.opacity_threshold_fine_after = 0.005
         
         super().__init__(parser, "Optimization Parameters")
 
