@@ -13,7 +13,11 @@ import math
 from tqdm import tqdm
 from scene.utils import Camera
 from typing import NamedTuple
-# from scene.dataset_readers import CameraInfo
+from torch.utils.data import Dataset
+from utils.general_utils import PILtoTorch
+# from scene.dataset_readers import 
+from utils.graphics_utils import getWorld2View2, focal2fov, fov2focal
+import copy
 class CameraInfo(NamedTuple):
     uid: int
     R: np.array
@@ -26,18 +30,16 @@ class CameraInfo(NamedTuple):
     width: int
     height: int
     time : float
-    # flow_f: np.array
-    # flow_mask_f: np.array
-    # flow_b: np.array
-    # flow_mask_b: np.array
-    # motion_mask: np.array
 
-class Load_hyper_data():
+
+class Load_hyper_data(Dataset):
     def __init__(self, 
                  datadir, 
                  ratio=1.0,
                  use_bg_points=False,
-                 add_cam=False):
+                 split="train"
+                 ):
+        
         from .utils import Camera
         datadir = os.path.expanduser(datadir)
         with open(f'{datadir}/scene.json', 'r') as f:
@@ -54,15 +56,13 @@ class Load_hyper_data():
 
         self.all_img = dataset_json['ids']
         self.val_id = dataset_json['val_ids']
-
-        self.add_cam = False
+        self.split = split
         if len(self.val_id) == 0:
             self.i_train = np.array([i for i in np.arange(len(self.all_img)) if
                             (i%4 == 0)])
             self.i_test = self.i_train+2
             self.i_test = self.i_test[:-1,]
         else:
-            self.add_cam = True
             self.train_id = dataset_json['train_ids']
             self.i_test = []
             self.i_train = []
@@ -72,10 +72,8 @@ class Load_hyper_data():
                     self.i_test.append(i)
                 if id in self.train_id:
                     self.i_train.append(i)
-        assert self.add_cam == add_cam
         
-        print('self.i_train',self.i_train)
-        print('self.i_test',self.i_test)
+
         self.all_cam = [meta_json[i]['camera_id'] for i in self.all_img]
         self.all_time = [meta_json[i]['warp_id'] for i in self.all_img]
         max_time = max(self.all_time)
@@ -83,127 +81,104 @@ class Load_hyper_data():
         self.selected_time = set(self.all_time)
         self.ratio = ratio
         self.max_time = max(self.all_time)
-
-
+        self.min_time = min(self.all_time)
+        self.i_video = [i for i in range(len(self.all_img))]
+        self.i_video.sort()
         # all poses
         self.all_cam_params = []
         for im in self.all_img:
             camera = Camera.from_json(f'{datadir}/camera/{im}.json')
             camera = camera.scale(ratio)
-            camera.position = camera.position - self.scene_center
-            camera.position = camera.position * self.coord_scale
-            camera.orientation = camera.orientation.T
-            # camera.orientation[0:3, 1:3] *= -1  # switch cam coord x,y
-            camera.orientation = camera.orientation[[1, 0, 2], :]  # switch world x,y
-            # camera.orientation[2, :] *= -1  # invert world z
-            
-            camera.orientation = - camera.orientation
-            camera.orientation[:,0] = -camera.orientation[:,0]
-            camera.orientation = camera.orientation.T
-            camera.position = -camera.position.dot(camera.orientation)
+            camera.position -=  self.scene_center
+            camera.position *=  self.coord_scale
             self.all_cam_params.append(camera)
 
         self.all_img = [f'{datadir}/rgb/{int(1/ratio)}x/{i}.png' for i in self.all_img]
         self.h, self.w = self.all_cam_params[0].image_shape
-
-        self.use_bg_points = use_bg_points
-        if use_bg_points:
-            with open(f'{datadir}/points.npy', 'rb') as f:
-                points = np.load(f)
-            self.bg_points = (points - self.scene_center) * self.coord_scale
-            self.bg_points = torch.tensor(self.bg_points).float()
-        print(f'total {len(self.all_img)} images ',
-                'use cam =',self.add_cam, 
-                'use bg_point=',self.use_bg_points)
-
-    def load_idx(self, idx,not_dic=False):
-
-        all_data = self.load_raw(idx)
-        if not_dic == True:
-            rays_o = all_data['rays_ori']
-            rays_d = all_data['rays_dir']
-            viewdirs = all_data['viewdirs']
-            rays_color = all_data['rays_color']
-            return rays_o, rays_d, viewdirs,rays_color
-        return all_data
-
-    def load_raw(self, idx):
+        self.map = {}
+        self.image_one = Image.open(self.all_img[0])
+        self.image_one_torch = PILtoTorch(self.image_one,None).to(torch.float32)
         
+    def __getitem__(self, index):
+        if self.split == "train":
+            return self.load_raw(self.i_train[index])
+ 
+        elif self.split == "test":
+            return self.load_raw(self.i_test[index])
+        elif self.split == "video":
+            return self.load_video(self.i_video[index])
+    def __len__(self):
+        if self.split == "train":
+            return len(self.i_train)
+        elif self.split == "test":
+            return len(self.i_test)
+        elif self.split == "video":
+            # return len(self.i_video)
+            return len(self.video_v2)
+    def load_video(self, idx):
+        if idx in self.map.keys():
+            return self.map[idx]
+        camera = self.all_cam_params[idx]
+        w = self.image_one.size[0]
+        h = self.image_one.size[1]
+        # image = PILtoTorch(image,None)
+        # image = image.to(torch.float32)
+        time = self.all_time[idx]
+        R = camera.orientation.T
+        T = - camera.position @ R
+        FovY = focal2fov(camera.focal_length, self.h)
+        FovX = focal2fov(camera.focal_length, self.w)
+        image_path = "/".join(self.all_img[idx].split("/")[:-1])
+        image_name = self.all_img[idx].split("/")[-1]
+        caminfo = CameraInfo(uid=idx, R=R, T=T, FovY=FovY, FovX=FovX, image=self.image_one_torch,
+                              image_path=image_path, image_name=image_name, width=w, height=h, time=time,
+                              )
+        self.map[idx] = caminfo
+        return caminfo  
+    def load_raw(self, idx):
+        if idx in self.map.keys():
+            return self.map[idx]
         camera = self.all_cam_params[idx]
         image = Image.open(self.all_img[idx])
-        im_data = np.array(image.convert("RGBA"))
-        norm_data = im_data / 255.0
-        bg = np.array([1,1,1]) if self.use_bg_points else np.array([0, 0, 0])
-        arr = norm_data[:,:,:3] * norm_data[:, :, 3:4] + bg * (1 - norm_data[:, :, 3:4])
-        rays_color = Image.fromarray(np.array(arr*255.0, dtype=np.byte), "RGB")
+        w = image.size[0]
+        h = image.size[1]
+        image = PILtoTorch(image,None)
+        image = image.to(torch.float32)
         time = self.all_time[idx]
-        import math
+        R = camera.orientation.T
+        T = - camera.position @ R
+        FovY = focal2fov(camera.focal_length, self.h)
+        FovX = focal2fov(camera.focal_length, self.w)
+        image_path = "/".join(self.all_img[idx].split("/")[:-1])
+        image_name = self.all_img[idx].split("/")[-1]
+        caminfo = CameraInfo(uid=idx, R=R, T=T, FovY=FovY, FovX=FovX, image=image,
+                              image_path=image_path, image_name=image_name, width=w, height=h, time=time,
+                              )
+        self.map[idx] = caminfo
+        return caminfo  
+
         
-        # def calculate_corrected_fov(w, h, focal_length, k1, k2, k3, p1, p2, x, y):
-        #     r = math.sqrt(x**2 + y**2)
-        #     fovx_corrected = 2 * math.atan(w / (2 * (focal_length * (1 + k1 * r**2 + k2 * r**4 + k3 * r**6))) + 2 * p1 * x * y + p2 * (r**2 + 2 * x**2))
-        #     fov_y_corrected = 2 * math.atan(h / (2 * (focal_length * (1 + k1 * r**2 + k2 * r**4 + k3 * r**6))) + 2 * p1 * x * y + p2 * (r**2 + 2 * y**2))
-        #     return fovx_corrected, fov_y_corrected
-        # fovx, fovy = calculate_corrected_fov(rays_color.size[0],
-        #                                     rays_color.size[1],
-        #                                     camera.focal_length,
-        #                                     camera.radial_distortion[0],
-        #                                     camera.radial_distortion[1],
-        #                                     camera.radial_distortion[2],
-        #                                     camera.tangential_distortion[0],
-        #                                     camera.tangential_distortion[1],
-        #                                     0,0)
-        pixels = camera.get_pixel_centers()
-        rays_dir_tensor = torch.tensor(camera.pixels_to_rays(pixels)).float().view([-1,3])
-        rays_ori_tensor = torch.tensor(camera.position[None, :]).float().expand_as(rays_dir_tensor)
-        rays_color_tensor = torch.tensor(np.array(image)).view([-1,3])/255.
-        
-        # poses = np.eye(4)
-        # poses[:3, :3] = camera.orientation
-        # poses[:3, 3] = camera.position
-        # matrix = np.linalg.inv(np.array(poses))
-        # R = -np.transpose(matrix[:3,:3])
-        # R[:,0] = -R[:,0]
-        # T = -matrix[:3, 3]
-        return {'camera': camera,
-                'image_path':"/".join(self.all_img[idx].split("/")[:-1]),
-                "image_name":self.all_img[idx].split("/")[-1],
-                'image': rays_color, 
-                'width':int(self.w),
-                'height':int(self.h),
-                'FovX':2 * math.atan(self.w / (2 * camera.focal_length)),
-                'FovY':2 * math.atan(self.h / (2 * camera.focal_length)),
-                'R':camera.orientation,
-                'T':camera.position,
-                'time':time,
-                'rays_ori': rays_ori_tensor, 
-                'rays_dir': rays_dir_tensor, 
-                'viewdirs':rays_dir_tensor / rays_dir_tensor.norm(dim=-1, keepdim=True),
-                'rays_color': rays_color_tensor, 
-                'near': torch.tensor(self.near).float().view([-1]), 
-                'far': torch.tensor(self.far).float().view([-1]),
-                }
 def format_hyper_data(data_class, split):
     if split == "train":
         data_idx = data_class.i_train
     elif split == "test":
         data_idx = data_class.i_test
-    
+    # dataset = data_class.copy()
+    # dataset.mode = split
     cam_infos = []
     for uid, index in tqdm(enumerate(data_idx)):
-        frame_info = data_class.load_idx(index)
-        image = frame_info['image']
-        image_path = frame_info["image_path"]
-        image_name = frame_info["image_name"]
-        width = frame_info["width"]
-        height = frame_info["height"]
-        R = frame_info["R"]
-        T = frame_info["T"]
-        FovY = frame_info["FovY"]
-        FovX = frame_info["FovX"]
-        time = frame_info["time"]
-        cam_info = CameraInfo(uid=uid, R=R, T=T, FovY=FovY, FovX=FovX, image=image,
-                              image_path=image_path, image_name=image_name, width=width, height=height, time=time,
+        camera = data_class.all_cam_params[index]
+        # image = Image.open(data_class.all_img[index])
+        # image = PILtoTorch(image,None)
+        time = data_class.all_time[index]
+        R = camera.orientation.T
+        T = - camera.position @ R
+        FovY = focal2fov(camera.focal_length, data_class.h)
+        FovX = focal2fov(camera.focal_length, data_class.w)
+        image_path = "/".join(data_class.all_img[index].split("/")[:-1])
+        image_name = data_class.all_img[index].split("/")[-1]
+        cam_info = CameraInfo(uid=uid, R=R, T=T, FovY=FovY, FovX=FovX, image=None,
+                              image_path=image_path, image_name=image_name, width=int(data_class.w), height=int(data_class.h), time=time,
                               )
         cam_infos.append(cam_info)
     return cam_infos

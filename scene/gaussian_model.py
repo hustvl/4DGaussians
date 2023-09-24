@@ -18,10 +18,11 @@ from utils.system_utils import mkdir_p
 from plyfile import PlyData, PlyElement
 from random import randint
 from utils.sh_utils import RGB2SH
-from simple_knn._C import distCUDA2
+# from simple_knn._C import distCUDA2
 from utils.graphics_utils import BasicPointCloud
 from utils.general_utils import strip_symmetric, build_scaling_rotation
-from scene.deformation import deform_network, TriPlaneGrid
+from scene.deformation import deform_network
+from scene.regulation import compute_plane_smoothness
 class GaussianModel:
 
     def setup_functions(self):
@@ -42,13 +43,13 @@ class GaussianModel:
         self.rotation_activation = torch.nn.functional.normalize
 
 
-    def __init__(self, sh_degree : int):
+    def __init__(self, sh_degree : int, args):
         self.active_sh_degree = 0
         self.max_sh_degree = sh_degree  
         self._xyz = torch.empty(0)
         # self._deformation =  torch.empty(0)
-        self._deformation = deform_network()
-        self.grid = TriPlaneGrid()
+        self._deformation = deform_network(args)
+        # self.grid = TriPlaneGrid()
         self._features_dc = torch.empty(0)
         self._features_rest = torch.empty(0)
         self._scaling = torch.empty(0)
@@ -60,14 +61,16 @@ class GaussianModel:
         self.optimizer = None
         self.percent_dense = 0
         self.spatial_lr_scale = 0
+        self._deformation_table = torch.empty(0)
         self.setup_functions()
 
     def capture(self):
         return (
             self.active_sh_degree,
             self._xyz,
-            self._deformation,
-            self.grid,
+            self._deformation.state_dict(),
+            self._deformation_table,
+            # self.grid,
             self._features_dc,
             self._features_rest,
             self._scaling,
@@ -83,8 +86,9 @@ class GaussianModel:
     def restore(self, model_args, training_args):
         (self.active_sh_degree, 
         self._xyz, 
+        self._deformation_table,
         self._deformation,
-        self.grid,
+        # self.grid,
         self._features_dc, 
         self._features_rest,
         self._scaling, 
@@ -139,7 +143,7 @@ class GaussianModel:
 
         print("Number of points at initialisation : ", fused_point_cloud.shape[0])
 
-        dist2 = torch.clamp_min(distCUDA2(torch.from_numpy(np.asarray(pcd.points)).float().cuda()), 0.0000001)
+        dist2 = torch.clamp_min(torch.from_numpy(np.asarray(pcd.points)).float().cuda())
         scales = torch.log(torch.sqrt(dist2))[...,None].repeat(1, 3)
         rots = torch.zeros((fused_point_cloud.shape[0], 4), device="cuda")
         rots[:, 0] = 1
@@ -148,7 +152,7 @@ class GaussianModel:
 
         self._xyz = nn.Parameter(fused_point_cloud.requires_grad_(True))
         self._deformation = self._deformation.to("cuda") 
-        self.grid = self.grid.to("cuda")
+        # self.grid = self.grid.to("cuda")
         self._features_dc = nn.Parameter(features[:,:,0:1].transpose(1, 2).contiguous().requires_grad_(True))
         self._features_rest = nn.Parameter(features[:,:,1:].transpose(1, 2).contiguous().requires_grad_(True))
         self._scaling = nn.Parameter(scales.requires_grad_(True))
@@ -184,10 +188,7 @@ class GaussianModel:
                                                     lr_final=training_args.deformation_lr_final*self.spatial_lr_scale,
                                                     lr_delay_mult=training_args.deformation_lr_delay_mult,
                                                     max_steps=training_args.position_lr_max_steps)    
-        self.grid_scheduler_args = get_expon_lr_func(lr_init=training_args.grid_lr_init*self.spatial_lr_scale,
-                                                    lr_final=training_args.grid_lr_final*self.spatial_lr_scale,
-                                                    lr_delay_mult=training_args.deformation_lr_delay_mult,
-                                                    max_steps=training_args.position_lr_max_steps)    
+
     def update_learning_rate(self, iteration):
         ''' Learning rate scheduling per step '''
         for param_group in self.optimizer.param_groups:
@@ -195,10 +196,7 @@ class GaussianModel:
                 lr = self.xyz_scheduler_args(iteration)
                 param_group['lr'] = lr
                 # return lr
-            if  "grid" in param_group["name"]:
-                lr = self.grid_scheduler_args(iteration)
-                param_group['lr'] = lr
-                # return lr
+
             elif param_group["name"] == "deformation":
                 lr = self.deformation_scheduler_args(iteration)
                 param_group['lr'] = lr
@@ -236,7 +234,8 @@ class GaussianModel:
             self._deformation_table = torch.load(os.path.join(path, "deformation_table.pth"),map_location="cuda")
         if os.path.exists(os.path.join(path, "deformation_accum.pth")):
             self._deformation_accum = torch.load(os.path.join(path, "deformation_accum.pth"),map_location="cuda")
-        
+        self.max_radii2D = torch.zeros((self.get_xyz.shape[0]), device="cuda")
+        # print(self._deformation.deformation_net.grid.)
     def save_deformation(self, path):
         torch.save(self._deformation.state_dict(),os.path.join(path, "deformation.pth"))
         torch.save(self._deformation_table,os.path.join(path, "deformation_table.pth"))
@@ -450,12 +449,16 @@ class GaussianModel:
         self.densification_postfix(new_xyz, new_features_dc, new_features_rest, new_opacities, new_scaling, new_rotation, new_deformation_table)
     def prune(self, max_grad, min_opacity, extent, max_screen_size):
         prune_mask = (self.get_opacity < min_opacity).squeeze()
+        # prune_mask_2 = torch.logical_and(self.get_opacity <= inverse_sigmoid(0.101 , dtype=torch.float, device="cuda"), self.get_opacity >= inverse_sigmoid(0.999 , dtype=torch.float, device="cuda"))
+        # prune_mask = torch.logical_or(prune_mask, prune_mask_2)
         # deformation_sum = abs(self._deformation).sum(dim=-1).mean(dim=-1) 
         # deformation_mask = (deformation_sum < torch.quantile(deformation_sum, torch.tensor([0.5]).to("cuda")))
         # prune_mask = prune_mask & deformation_mask
         if max_screen_size:
             big_points_vs = self.max_radii2D > max_screen_size
             big_points_ws = self.get_scaling.max(dim=1).values > 0.1 * extent
+            prune_mask = torch.logical_or(prune_mask, big_points_vs)
+
             prune_mask = torch.logical_or(torch.logical_or(prune_mask, big_points_vs), big_points_ws)
         self.prune_points(prune_mask)
 
@@ -473,14 +476,15 @@ class GaussianModel:
         rotations = self._rotation.detach()
         opacity = self._opacity.detach()
         time =  torch.tensor(0).to("cuda").repeat(means3D.shape[0],1)
-        means3D_deform, _, rotations_deform, _ = self._deformation(means3D, scales, rotations, opacity, time)
+        means3D_deform, scales_deform, rotations_deform, _ = self._deformation(means3D, scales, rotations, opacity, time)
         position_error = (means3D_deform - means3D)**2
         rotation_error = (rotations_deform - rotations)**2 
-        return position_error.mean(), rotation_error.mean()
+        scaling_erorr = (scales_deform - scales)**2
+        return position_error.mean() + rotation_error.mean() + scaling_erorr.mean()
 
 
     def add_densification_stats(self, viewspace_point_tensor, update_filter):
-        self.xyz_gradient_accum[update_filter] += torch.norm(viewspace_point_tensor.grad[update_filter,:2], dim=-1, keepdim=True)
+        self.xyz_gradient_accum[update_filter] += torch.norm(viewspace_point_tensor[update_filter,:2], dim=-1, keepdim=True)
         self.denom[update_filter] += 1
     @torch.no_grad()
     def update_deformation_table(self,threshold):
@@ -496,3 +500,43 @@ class GaussianModel:
                     if weight.grad.mean() != 0:
                         print(name," :",weight.grad.mean(), weight.grad.min(), weight.grad.max())
         print("-"*50)
+    def _plane_regulation(self):
+        multi_res_grids = self._deformation.deformation_net.grid.grids
+        total = 0
+        # model.grids is 6 x [1, rank * F_dim, reso, reso]
+        for grids in multi_res_grids:
+            if len(grids) == 3:
+                time_grids = []
+            else:
+                time_grids =  [0,1,3]
+            for grid_id in time_grids:
+                total += compute_plane_smoothness(grids[grid_id])
+        return total
+    def _time_regulation(self):
+        multi_res_grids = self._deformation.deformation_net.grid.grids
+        total = 0
+        # model.grids is 6 x [1, rank * F_dim, reso, reso]
+        for grids in multi_res_grids:
+            if len(grids) == 3:
+                time_grids = []
+            else:
+                time_grids =[2, 4, 5]
+            for grid_id in time_grids:
+                total += compute_plane_smoothness(grids[grid_id])
+        return total
+    def _l1_regulation(self):
+                # model.grids is 6 x [1, rank * F_dim, reso, reso]
+        multi_res_grids = self._deformation.deformation_net.grid.grids
+
+        total = 0.0
+        for grids in multi_res_grids:
+            if len(grids) == 3:
+                continue
+            else:
+                # These are the spatiotemporal grids
+                spatiotemporal_grids = [2, 4, 5]
+            for grid_id in spatiotemporal_grids:
+                total += torch.abs(1 - grids[grid_id]).mean()
+        return total
+    def compute_regulation(self, time_smoothness_weight, l1_time_planes_weight, plane_tv_weight):
+        return plane_tv_weight * self._plane_regulation() + time_smoothness_weight * self._time_regulation() + l1_time_planes_weight * self._l1_regulation()

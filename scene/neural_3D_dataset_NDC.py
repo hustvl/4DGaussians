@@ -262,7 +262,7 @@ class Neural3D_NDC_Dataset(Dataset):
         poses_arr = np.load(os.path.join(self.root_dir, "poses_bounds.npy"))
         poses = poses_arr[:, :-2].reshape([-1, 3, 5])  # (N_cams, 3, 5)
         self.near_fars = poses_arr[:, -2:]
-        videos = glob.glob(os.path.join(self.root_dir, "cam*.mp4"))
+        videos = glob.glob(os.path.join(self.root_dir, "cam*"))
         videos = sorted(videos)
         assert len(videos) == poses_arr.shape[0]
 
@@ -306,6 +306,7 @@ class Neural3D_NDC_Dataset(Dataset):
         image_times = []
         N_cams = 0
         N_time = 0
+        countss = 300
         for index, video_path in enumerate(videos):
             
             if index == self.eval_index:
@@ -325,7 +326,7 @@ class Neural3D_NDC_Dataset(Dataset):
                 this_count = 0
                 while video_frames.isOpened():
                     ret, video_frame = video_frames.read()
-                    if this_count >= 300:break
+                    if this_count >= countss:break
                     if ret:
                         video_frame = cv2.cvtColor(video_frame, cv2.COLOR_BGR2RGB)
                         video_frame = Image.fromarray(video_frame)
@@ -344,14 +345,14 @@ class Neural3D_NDC_Dataset(Dataset):
             images_path.sort()
             this_count = 0
             for idx, path in enumerate(images_path):
-                if this_count >=300:break
+                if this_count >=countss:break
                 image_paths.append(os.path.join(image_path,path))
                 pose = np.array(self.poses_all[index])
                 R = pose[:3,:3]
                 R = -R
                 R[:,0] = -R[:,0]
                 T = -pose[:3,3].dot(R)
-                image_times.append(idx/len(image_path))
+                image_times.append(idx/countss)
                 image_poses.append((R,T))
                 # if self.downsample != 1.0:
                 #     img = video_frame.resize(self.img_wh, Image.LANCZOS)
