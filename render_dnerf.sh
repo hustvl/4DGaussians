@@ -1,0 +1,20 @@
+exp_name1="main_coarse2fine_timegrid2_pointgrow"
+# exp_name2="main_output_grow_threshold_div10"
+# exp_name3="main_output_grow
+export CUDA_VISIBLE_DEVICES=2&&python render.py --m "output/standup$exp_name1"  &
+export CUDA_VISIBLE_DEVICES=3&&python render.py --m "output/lego$exp_name1"  
+export CUDA_VISIBLE_DEVICES=2&&python render.py --m "output/hook/$exp_name1/"  &
+export CUDA_VISIBLE_DEVICES=3&&python render.py --m "output/bouncingball/$exp_name1/"  
+export CUDA_VISIBLE_DEVICES=2&&python render.py --m "output/trex/$exp_name1/" &
+export CUDA_VISIBLE_DEVICES=3&&python render.py --m "output/jumpingjack/$exp_name1/" 
+export CUDA_VISIBLE_DEVICES=2&&python render.py --m "output/hellwarrior/$exp_name1" &
+export CUDA_VISIBLE_DEVICES=3&&python render.py --m "output/mutant/$exp_name1" 
+
+export CUDA_VISIBLE_DEVICES=2&&python metrics.py --m "output/standup$exp_name1"  &
+export CUDA_VISIBLE_DEVICES=3&&python metrics.py --m "output/lego$exp_name1"  
+export CUDA_VISIBLE_DEVICES=2&&python metrics.py --m "output/hook/$exp_name1/"  &
+export CUDA_VISIBLE_DEVICES=3&&python metrics.py --m "output/bouncingball/$exp_name1/"  
+export CUDA_VISIBLE_DEVICES=2&&python metrics.py --m "output/trex/$exp_name1/" &
+export CUDA_VISIBLE_DEVICES=3&&python metrics.py --m "output/jumpingjack/$exp_name1/" 
+export CUDA_VISIBLE_DEVICES=2&&python metrics.py --m "output/hellwarrior/$exp_name1" &
+export CUDA_VISIBLE_DEVICES=3&&python metrics.py --m "output/mutant/$exp_name1" # echo "Done"
