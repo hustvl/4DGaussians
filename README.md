@@ -1,6 +1,6 @@
 # 4D-GS: Fast Dynamic Gaussians for Real-Time Rendering
 
-## [Project page](https://ingra14m.github.io/Deformable-3D-Gaussians.github.io/) | [Paper](https://arxiv.org/abs/2309.13101)
+## [Project page](https://guanjunwu.github.io/4DGS/index.html) | [Paper](https://arxiv.org/abs/2309.13101)
 
 
 This repository contains the official implementation associated with the paper 4D-GS: Fast Dynamic Gaussians for Real-Time Rendering". 

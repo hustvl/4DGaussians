@@ -61,8 +61,6 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
     first_iter += 1
     lpips_model = lpips.LPIPS(net="alex").cuda()
     video_cams = scene.getVideoCameras()
-    time_begin = time()
-    total_time = 0
     # selected_render_frame = [int(np.log(item)) for item in range()]
     count = 0
     for iteration in range(first_iter, final_iter+1):        
@@ -73,16 +71,14 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
                 net_image_bytes = None
                 custom_cam, do_training, pipe.convert_SHs_python, pipe.compute_cov3D_python, keep_alive, scaling_modifer = network_gui.receive()
                 if custom_cam != None:
-                    # count +=1
-                    # viewpoint_index = count  % len(video_cams)
-                    # print(count,viewpoint_index,len(video_cams),sep = " ",end=" ")
-                    # if (count //(len(video_cams))) % 2 == 0:
-                    #     viewpoint_index = viewpoint_index
-                    # else:
-                    #     viewpoint_index = (len(video_cams)) - viewpoint_index - 1
-                    # print(viewpoint_index)
-                    # viewpoint = video_cams[viewpoint_index]
-                    # custom_cam.time = viewpoint.time
+                    count +=1
+                    viewpoint_index = count  % len(video_cams)
+                    if (count //(len(video_cams))) % 2 == 0:
+                        viewpoint_index = viewpoint_index
+                    else:
+                        viewpoint_index = (len(video_cams)) - viewpoint_index - 1
+                    viewpoint = video_cams[viewpoint_index]
+                    custom_cam.time = viewpoint.time
                     net_image = render(custom_cam, gaussians, pipe, background, scaling_modifer, stage="stage")["render"]
                     net_image_bytes = memoryview((torch.clamp(net_image, min=0, max=1.0) * 255).byte().permute(1, 2, 0).contiguous().cpu().numpy())
                 network_gui.send(net_image_bytes, dataset.source_path)
@@ -111,11 +107,6 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
                 viewpoint_cams = next(loader)
             except StopIteration:
                 print("reset dataloader")
-                # if stage == "coarse":
-                    # batch_size = 1
-                # if stage == "fine": 
-                    # batch_size = 1
-                # viewpoint_stack_loader = DataLoader(viewpoint_stack, batch_size=batch_size,shuffle=True,num_workers=32,collate_fn=list)
                 loader = iter(viewpoint_stack_loader)
         else:
             idx = randint(0, len(viewpoint_stack)-1)
@@ -129,6 +120,7 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
         radii_list = []
         visibility_filter_list = []
         viewspace_point_tensor_list = []
+        # if training Gaussians with minibatch, this will work.
         for viewpoint_cam in viewpoint_cams:
             render_pkg = render(viewpoint_cam, gaussians, pipe, background, stage=stage)
             image, viewspace_point_tensor, visibility_filter, radii = render_pkg["render"], render_pkg["viewspace_points"], render_pkg["visibility_filter"], render_pkg["radii"]
@@ -211,10 +203,7 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
                 # Keep track of max radii in image-space for pruning
                 gaussians.max_radii2D[visibility_filter] = torch.max(gaussians.max_radii2D[visibility_filter], radii[visibility_filter])
                 gaussians.add_densification_stats(viewspace_point_tensor_grad, visibility_filter)
-                # if  iteration % opt.densification_interval == 0 and stage == "fine":
-                #     gaussians.update_deformation_table(0.05)           
-                # else:  
-                #     gaussians.update_deformation_table(-1)    
+ 
                 if stage == "coarse":
                     opacity_threshold = opt.opacity_threshold_coarse
                     densify_threshold = opt.densify_grad_threshold_coarse
@@ -228,12 +217,9 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
                     gaussians.densify(densify_threshold, opacity_threshold, scene.cameras_extent, size_threshold)
                 if iteration > opt.pruning_from_iter and iteration % opt.pruning_interval == 0:
                     size_threshold = 20 if iteration > opt.opacity_reset_interval else None
-                    # pruning_threshold = 0.00005 if stage == "coarse" else 0.05
 
                     gaussians.prune(densify_threshold, opacity_threshold, scene.cameras_extent, size_threshold)
-                # if iteration > opt.pruning_from_iter and iteration % opt.pruning_interval == 0:
                     
-                    # gaussians.grow(opt.densify_grad_threshold, 0.005, scene.cameras_extent, size_threshold)
                 if iteration % opt.opacity_reset_interval == 0 or (dataset.white_background and iteration == opt.densify_from_iter):
                     print("reset opacity")
                     gaussians.reset_opacity()

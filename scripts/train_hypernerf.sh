@@ -1,4 +1,4 @@
-exp_name1="main_11"
+exp_name1="train"
 export CUDA_VISIBLE_DEVICES=0&&python train.py -s data/hypernerf/virg/3dprinter --port 6021 --expname "3dprinter/$exp_name1/" --configs arguments/hypernerf/default.py &
 export CUDA_VISIBLE_DEVICES=1&&python train.py -s data/hypernerf/virg/broom2 --port 6026 --expname "broom2/$exp_name1/"     --configs arguments/hypernerf/default.py &
 export CUDA_VISIBLE_DEVICES=2&&python train.py -s data/hypernerf/virg/chicken --port 6029 --expname "chicken/$exp_name1/" --configs arguments/hypernerf/default.py &

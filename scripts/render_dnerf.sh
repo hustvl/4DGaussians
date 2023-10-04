@@ -1,4 +1,4 @@
-exp_name1="main_coarse2fine_timegrid2_pointgrow"
+exp_name1="train"
 # exp_name2="main_output_grow_threshold_div10"
 # exp_name3="main_output_grow
 export CUDA_VISIBLE_DEVICES=2&&python render.py --m "output/standup$exp_name1"  &

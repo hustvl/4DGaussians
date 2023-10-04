@@ -1,4 +1,4 @@
-exp_name="main_coarse2fine_timegrid2"
+exp_name="train"
 # export CUDA_VISIBLE_DEVICES=3&&python train.py -s data/dnerf/standup --port 6015 --expname "$exp_name/standup" &
 # export CUDA_VISIBLE_DEVICES=2&&python train.py -s data/dnerf/lego --port 6016 --expname "$exp_name/lego" &
 # export CUDA_VISIBLE_DEVICES=2&&python train.py -s data/dnerf/jumpingjacks --port 6020 --expname "$exp_name/jumpingjack" &

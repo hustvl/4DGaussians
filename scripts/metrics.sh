@@ -1,4 +1,4 @@
-exp_name="main_coarse2fine_timegrid"
+exp_name="train"
 # export CUDA_VISIBLE_DEVICES=0&&python metrics.py --m "output/standup$exp_name"  &
 # export CUDA_VISIBLE_DEVICES=1&&python metrics.py --m "output/lego$exp_name"  &
 # export CUDA_VISIBLE_DEVICES=2&&python metrics.py --m "output/jumpingjack/$exp_name1/" &

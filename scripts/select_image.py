@@ -38,5 +38,4 @@ for image_file in load_path:
     image = imageio.imread(image_file)
     writer.append_data(image)
 
-# 关闭视频写入器
 writer.close()
