@@ -98,7 +98,9 @@ There are some helpful scripts in `scripts/`, please feel free to use them.
 
 Some source code of ours is borrowed from [3DGS](https://github.com/graphdeco-inria/gaussian-splatting), [k-planes](https://github.com/Giodiro/kplanes_nerfstudio),[HexPlane](https://github.com/Caoang327/HexPlane), [TiNeuVox](https://github.com/hustvl/TiNeuVox). We sincerely appreciate the excellent works of these authors.
 
+## Acknowledgement
 
+We would like to express our sincere gratitude to @zhouzhenghong-gt for his revisions to our code and discussions on the content of our paper.
 ## Citation
 If you find this repository/work helpful in your research, welcome to cite the paper and give a ⭐.
 ```
