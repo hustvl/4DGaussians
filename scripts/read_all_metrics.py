@@ -1,8 +1,7 @@
 import json
 import os
-exp_name = ["dnerf_gridlarge","dnerf_gridsmall","dnerf_gridsmaller","dnerf_mlplarge","dnerf_mlplarger","dnerf_nocoarse","dnerf_silm","dnerf_imageloss",
-            "dnerf_3dgs","dnerf_tv","dnerf_noboth","dnerf_nogrid"]
-scene_name = ["bouncingball","jumpingjack","lego","standup","hook","mutant","hellwarrior","trex"]
+exp_name = ["dnerf_tv_test"]
+scene_name = ["bouncingballs","jumpingjacks","lego","standup","hook","mutant","hellwarrior","trex"]
 json_name = "results.json"
 result_json = {"SSIM":0,"PSNR":0,"LPIPS":0}
 exp_json = {}

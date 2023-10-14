@@ -40,7 +40,7 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
         # torchvision.utils.save_image(rendering, os.path.join(render_path, '{0:05d}'.format(idx) + ".png"))
         render_images.append(to8b(rendering).transpose(1,2,0))
         # print(to8b(rendering).shape)
-        # render_list.append(rendering)
+        render_list.append(rendering)
         if name in ["train", "test"]:
             gt = view.original_image[0:3, :, :]
             # torchvision.utils.save_image(gt, os.path.join(gts_path, '{0:05d}'.format(idx) + ".png"))

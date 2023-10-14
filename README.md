@@ -4,9 +4,7 @@
 
 ### [Project Page](https://guanjunwu.github.io/4dgs/index.html)| [Arxiv Paper](https://arxiv.org/abs/2310.08528)
 
-<!-- | [Video](https://youtu.be/sROLfK_VkCk) -->
 
-<!-- [Fast Dynamic Radiance Fields with Time-Aware Neural Voxels](https://jaminfong.cn/tineuvox)    -->
 [Guanjun Wu](https://guanjunwu.github.io/)<sup>1*</sup>, [Taoran Yi](https://github.com/taoranyi)<sup>2*</sup>,
 [Jiemin Fang](https://jaminfong.cn/)<sup>3</sup>, [Lingxi Xie](http://lingxixie.com/)<sup>3</sup>, </br>[Xiaopeng Zhang](https://sites.google.com/site/zxphistory/)<sup>3</sup>, [Wei Wei](https://www.eric-weiwei.com/)<sup>1</sup>,[Wenyu Liu](http://eic.hust.edu.cn/professor/liuwenyu/)<sup>2</sup>, [Qi Tian](https://scholar.google.com/citations?hl=en&user=61b6eYkAAAAJ)<sup>3</sup> , [Xinggang Wang](https://xinggangw.info/)<sup>2✉</sup>
 

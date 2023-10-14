@@ -18,7 +18,7 @@ from utils.system_utils import mkdir_p
 from plyfile import PlyData, PlyElement
 from random import randint
 from utils.sh_utils import RGB2SH
-# from simple_knn._C import distCUDA2
+from simple_knn._C import distCUDA2
 from utils.graphics_utils import BasicPointCloud
 from utils.general_utils import strip_symmetric, build_scaling_rotation
 from scene.deformation import deform_network
@@ -143,7 +143,7 @@ class GaussianModel:
 
         print("Number of points at initialisation : ", fused_point_cloud.shape[0])
 
-        dist2 = torch.clamp_min(torch.from_numpy(np.asarray(pcd.points)).float().cuda())
+        dist2 = torch.clamp_min(distCUDA2(torch.from_numpy(np.asarray(pcd.points)).float().cuda()), 0.0000001)
         scales = torch.log(torch.sqrt(dist2))[...,None].repeat(1, 3)
         rots = torch.zeros((fused_point_cloud.shape[0], 4), device="cuda")
         rots[:, 0] = 1
@@ -188,6 +188,10 @@ class GaussianModel:
                                                     lr_final=training_args.deformation_lr_final*self.spatial_lr_scale,
                                                     lr_delay_mult=training_args.deformation_lr_delay_mult,
                                                     max_steps=training_args.position_lr_max_steps)    
+        self.grid_scheduler_args = get_expon_lr_func(lr_init=training_args.grid_lr_init*self.spatial_lr_scale,
+                                                    lr_final=training_args.grid_lr_final*self.spatial_lr_scale,
+                                                    lr_delay_mult=training_args.deformation_lr_delay_mult,
+                                                    max_steps=training_args.position_lr_max_steps)    
 
     def update_learning_rate(self, iteration):
         ''' Learning rate scheduling per step '''
@@ -196,7 +200,10 @@ class GaussianModel:
                 lr = self.xyz_scheduler_args(iteration)
                 param_group['lr'] = lr
                 # return lr
-
+            if  "grid" in param_group["name"]:
+                lr = self.grid_scheduler_args(iteration)
+                param_group['lr'] = lr
+                # return lr
             elif param_group["name"] == "deformation":
                 lr = self.deformation_scheduler_args(iteration)
                 param_group['lr'] = lr
