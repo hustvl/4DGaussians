@@ -146,10 +146,6 @@ class deform_network(nn.Module):
         return self.deformation_net.get_mlp_parameters() + list(self.timenet.parameters())
     def get_grid_parameters(self):
         return self.deformation_net.get_grid_parameters()
-class Tineuvox(nn.Module):
-    def __init__(self) -> None:
-        super(Tineuvox).__init__()
-        pass
 
 def initialize_weights(m):
     if isinstance(m, nn.Linear):

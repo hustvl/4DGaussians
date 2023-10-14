@@ -1,4 +1,4 @@
-bash scripts/train_ablation.sh dnerf_noboth
+bash scripts/process_dnerf.sh dnerf_tv_test
 wait
 # bash scripts/train_ablation.sh dnerf_3dgs
 # wait

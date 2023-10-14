@@ -180,11 +180,3 @@ class HexPlaneField(nn.Module):
         features = self.get_density(pts, timestamps)
 
         return features
-if __name__ == "__main__":
-    aabb = torch.tensor([[-3,-3,-3],
-                         [3,3,3]])
-    planes = KPlaneField(aabb)
-    pts = torch.randn(10000,3)
-    time = torch.ones(10000,1)
-    features = planes.forward(pts,time)
-    print(features.shape)
