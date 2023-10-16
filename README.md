@@ -31,13 +31,13 @@ Please follow the [3D-GS](https://github.com/graphdeco-inria/gaussian-splatting)
 ```bash
 git clone https://github.com/hustvl/4DGaussians
 cd 4DGaussians
+git submodule update --init --recursive
 conda create -n Gaussians4D python=3.7 
 conda activate Gaussians4D
 
 pip install -r requirements.txt
-cd submodules
-git clone https://github.com/ingra14m/depth-diff-gaussian-rasterization
-pip install -e depth-diff-gaussian-rasterization
+pip install -e submodules/depth-diff-gaussian-rasterization
+pip install -e submodules/simple-knn
 ```
 In our environment, we use pytorch=1.13.1+cu116.
 ## Data Preparation
