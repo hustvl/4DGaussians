@@ -14,7 +14,8 @@
 
 ![block](assets/teaserfig.png)   
 Our method converges very quickly. And achieves real-time rendering speed.
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/camenduru/4DGaussians-colab/blob/main/4DGaussians_colab.ipynb) (Thanks to [camenduru](https://github.com/camenduru/4DGaussians-colab))
+
+Colab demo:[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/camenduru/4DGaussians-colab/blob/main/4DGaussians_colab.ipynb) (Thanks to [camenduru](https://github.com/camenduru/4DGaussians-colab))
 
 <video width="320" height="240" controls>
   <sourc src="assets/teaservideo.mp4" type="video/mp4">
