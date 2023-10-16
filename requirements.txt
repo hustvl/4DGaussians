@@ -6,3 +6,4 @@ matplotlib
 argparse
 lpips
 plyfile
+imageio-ffmpeg
