@@ -89,7 +89,7 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
         # Pick a random Camera
         if not viewpoint_stack:
             viewpoint_stack = scene.getTrainCameras()
-            batch_size = 1
+            batch_size = opt.batch_size
             viewpoint_stack_loader = DataLoader(viewpoint_stack, batch_size=batch_size,shuffle=True,num_workers=32,collate_fn=list)
             loader = iter(viewpoint_stack_loader)
         if opt.dataloader:
@@ -97,7 +97,7 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
                 viewpoint_cams = next(loader)
             except StopIteration:
                 print("reset dataloader")
-                batch_size = 1
+                batch_size = opt.batch_size
                 loader = iter(viewpoint_stack_loader)
         else:
             idx = randint(0, len(viewpoint_stack)-1)

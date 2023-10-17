@@ -16,8 +16,8 @@ ModelHiddenParams = dict(
 )
 OptimizationParams = dict(
     dataloader=True,
-    iterations = 30_000,
-    batch_size=4,
+    iterations = 60_000,
+    batch_size=8,
     coarse_iterations = 3000,
     densify_until_iter = 20_000,
     opacity_reset_interval = 20000,

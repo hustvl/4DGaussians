@@ -264,6 +264,7 @@ class Neural3D_NDC_Dataset(Dataset):
         self.near_fars = poses_arr[:, -2:]
         videos = glob.glob(os.path.join(self.root_dir, "cam*"))
         videos = sorted(videos)
+        breakpoint()
         assert len(videos) == poses_arr.shape[0]
 
         H, W, focal = poses[0, :, -1]
