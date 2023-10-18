@@ -12,6 +12,8 @@
 
 ---------------------------------------------------
 
+---
+
 ![block](assets/teaserfig.png)   
 Our method converges very quickly and achieves real-time rendering speed.
 
@@ -75,7 +77,7 @@ The dataset provided in [HyperNeRF](https://github.com/google/hypernerf) is used
 
 
 ## Training
-For training synthetic scenes such as `lego`, run 
+For training synthetic scenes such as `bouncingballs`, run 
 ``` 
 python train.py -s data/dnerf/bouncingballs --port 6017 --expname "dnerf/bouncingballs" --configs arguments/dnerf/bouncingballs.py 
 ``` 
@@ -99,7 +101,11 @@ python metrics.py --model_path "output/dnerf/bouncingballs/"
 There are some helpful scripts in `scripts/`, please feel free to use them.
 
 ---
+## Contributions
 
+**This project is still under development. Please feel free to raise issues or submit pull requests to contribute to our codebase.**
+
+---
 Some source code of ours is borrowed from [3DGS](https://github.com/graphdeco-inria/gaussian-splatting), [k-planes](https://github.com/Giodiro/kplanes_nerfstudio),[HexPlane](https://github.com/Caoang327/HexPlane), [TiNeuVox](https://github.com/hustvl/TiNeuVox). We sincerely appreciate the excellent works of these authors.
 
 ## Acknowledgement
