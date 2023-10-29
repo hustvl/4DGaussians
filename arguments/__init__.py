@@ -55,6 +55,9 @@ class ModelParams(ParamGroup):
         self.data_device = "cuda"
         self.eval = True
         self.render_process=False
+        self.add_points=False
+        self.extension=".png"
+        self.llffhold=8
         super().__init__(parser, "Loading Parameters", sentinel)
 
     def extract(self, args):
@@ -66,7 +69,7 @@ class PipelineParams(ParamGroup):
     def __init__(self, parser):
         self.convert_SHs_python = False
         self.compute_cov3D_python = False
-        self.debug = False
+        self.debug = True
         super().__init__(parser, "Pipeline Parameters")
 class ModelHiddenParams(ParamGroup):
     def __init__(self, parser):
@@ -89,10 +92,16 @@ class ModelHiddenParams(ParamGroup):
                              'resolution': [64, 64, 64, 25]
                             }
         self.multires = [1, 2, 4, 8]
+        self.no_dx=False
         self.no_grid=False
         self.no_ds=False
         self.no_dr=False
         self.no_do=True
+        self.no_dshs=True
+        self.empty_voxel=False
+        self.grid_pe=0
+        self.static_mlp=False
+        self.apply_rotation=False
 
         
         super().__init__(parser, "ModelHiddenParams")
@@ -100,6 +109,8 @@ class ModelHiddenParams(ParamGroup):
 class OptimizationParams(ParamGroup):
     def __init__(self, parser):
         self.dataloader=False
+        self.zerostamp_init=False
+        self.custom_sampler=None
         self.iterations = 30_000
         self.coarse_iterations = 3000
         self.position_lr_init = 0.00016
@@ -134,8 +145,8 @@ class OptimizationParams(ParamGroup):
         self.opacity_threshold_coarse = 0.005
         self.opacity_threshold_fine_init = 0.005
         self.opacity_threshold_fine_after = 0.005
-        self.batch_size=1,
-        
+        self.batch_size=1
+        self.add_point=False
         super().__init__(parser, "Optimization Parameters")
 
 def get_combined_args(parser : ArgumentParser):

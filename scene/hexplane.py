@@ -146,19 +146,20 @@ class HexPlaneField(nn.Module):
             self.grids.append(gp)
         # print(f"Initialized model grids: {self.grids}")
         print("feature_dim:",self.feat_dim)
-
-
+    @property
+    def get_aabb(self):
+        return self.aabb[0], self.aabb[1]
     def set_aabb(self,xyz_max, xyz_min):
         aabb = torch.tensor([
             xyz_max,
             xyz_min
-        ])
-        self.aabb = nn.Parameter(aabb,requires_grad=True)
+        ],dtype=torch.float32)
+        self.aabb = nn.Parameter(aabb,requires_grad=False)
         print("Voxel Plane: set aabb=",self.aabb)
 
     def get_density(self, pts: torch.Tensor, timestamps: Optional[torch.Tensor] = None):
         """Computes and returns the densities."""
-
+        # breakpoint()
         pts = normalize_aabb(pts, self.aabb)
         pts = torch.cat((pts, timestamps), dim=-1)  # [n_rays, n_samples, 4]
 

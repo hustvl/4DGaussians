@@ -6,3 +6,5 @@ matplotlib
 argparse
 lpips
 plyfile
+pytorch_msssim
+open3d
