@@ -18,6 +18,7 @@ from scene.colmap_loader import read_extrinsics_text, read_intrinsics_text, qvec
 from scene.hyper_loader import Load_hyper_data, format_hyper_data
 import torchvision.transforms as transforms
 import copy
+import plyfile
 from utils.graphics_utils import getWorld2View2, focal2fov, fov2focal
 import numpy as np
 import torch
@@ -454,7 +455,15 @@ def readdynerfInfo(datadir,use_bg_points,eval):
     xyz_max = np.array([1.5*threshold, 1.5*threshold, 1.5*threshold])
     xyz_min = np.array([-1.5*threshold, -1.5*threshold, -1.5*threshold])
     # We create random points inside the bounds of the synthetic Blender scenes
-    xyz = (np.random.random((num_pts, 3)))* (xyz_max-xyz_min) + xyz_min
+    # xyz = (np.random.random((num_pts, 3)))* (xyz_max-xyz_min) + xyz_min
+
+    data = plyfile.PlyData.read('/home/spaceport/Softwares/4DGaussians/output/coffee_martini_2.4K.ply')
+    xyz_data = data.elements[0].data
+    num_pts = len(xyz_data)
+    xyz_list = [list(x) for x in (data.elements[0].data)]
+    xyz_np = np.array(xyz_list)
+    xyz=xyz_np[:,0:3]
+    
     print("point cloud initialization:",xyz.max(axis=0),xyz.min(axis=0))
     shs = np.random.random((num_pts, 3)) / 255.0
     pcd = BasicPointCloud(points=xyz, colors=SH2RGB(shs), normals=np.zeros((num_pts, 3)))
@@ -464,6 +473,7 @@ def readdynerfInfo(datadir,use_bg_points,eval):
         pcd = fetchPly(ply_path)
     except:
         pcd = None
+    
     scene_info = SceneInfo(point_cloud=pcd,
                            train_cameras=train_dataset,
                            test_cameras=test_dataset,
