@@ -112,14 +112,21 @@ Some source code of ours is borrowed from [3DGS](https://github.com/graphdeco-i
 
 ## Acknowledgement
 
-We would like to express our sincere gratitude to @zhouzhenghong-gt for his revisions to our code and discussions on the content of our paper.
+We would like to express our sincere gratitude to [@zhouzhenghong-gt](https://github.com/zhouzhenghong-gt/) for his revisions to our code and discussions on the content of our paper.
 ## Citation
-If you find this repository/work helpful in your research, welcome to cite the paper and give a ⭐.
+Some insights about neural voxel grids and dynamic scenes reconstruction originate from [TiNeuVox](https://github.com/hustvl/TiNeuVox). If you find this repository/work helpful in your research, welcome to cite these papers and give a ⭐. 
 ```
 @article{wu20234dgaussians,
   title={4D Gaussian Splatting for Real-Time Dynamic Scene Rendering},
   author={Wu, Guanjun and Yi, Taoran and Fang, Jiemin and Xie, Lingxi and Zhang, Xiaopeng and Wei Wei and Liu, Wenyu and Tian, Qi and Wang Xinggang},
   journal={arXiv preprint arXiv:2310.08528},
   year={2023}
+}
+
+@inproceedings{TiNeuVox,
+  author = {Fang, Jiemin and Yi, Taoran and Wang, Xinggang and Xie, Lingxi and Zhang, Xiaopeng and Liu, Wenyu and Nie\ss{}ner, Matthias and Tian, Qi},
+  title = {Fast Dynamic Radiance Fields with Time-Aware Neural Voxels},
+  year = {2022},
+  booktitle = {SIGGRAPH Asia 2022 Conference Papers}
 }
 ```
