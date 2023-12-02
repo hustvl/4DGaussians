@@ -24,4 +24,7 @@
 
 # bash scripts/train_ablation.sh dnerf_tv_2_1
 
-bash scripts/train_ablation.sh dnerf_tv_2_1_nodrds
+bash scripts/process_dnerf.sh dnerf
+bash scripts/train_dynerf.sh dynerf
+bash scripts/train_hyper_interp.sh hypernerf
+bash scripts/train_hyper_virg.sh hypernerf

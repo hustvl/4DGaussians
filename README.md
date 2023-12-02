@@ -1,6 +1,6 @@
 # 4D Gaussian Splatting for Real-Time Dynamic Scene Rendering
 
-## arXiv Preprint
+## ArXiv Preprint
 
 ### [Project Page](https://guanjunwu.github.io/4dgs/index.html)| [arXiv Paper](https://arxiv.org/abs/2310.08528)
 
@@ -89,6 +89,16 @@ You can just run the following script to evaluate the model.
 ```
 python metrics.py --model_path "output/dnerf/bouncingballs/" 
 ```
+## Custom Datasets
+Install nerfstudio and follow their colmap pipeline.
+
+```
+pip install nerfstudio
+ns-process-data images --data data/your-data --output-dir data/your-ns-data
+python train.py -s data/your-ns-data --port 6017 --expname "custom" --configs arguments/hypernerf/default.py 
+
+```
+
 ## Scripts
 
 There are some helpful scripts in , please feel free to use them.

@@ -640,10 +640,6 @@ sceneLoadTypeCallbacks = {
     "Blender" : readNerfSyntheticInfo,
     "dynerf" : readdynerfInfo,
     "nerfies": readHyperDataInfos,  # NeRFies & HyperNeRF dataset proposed by [https://github.com/google/hypernerf/releases/tag/v0.1]
-<<<<<<< HEAD
     "PanopticSports" : readPanopticSportsinfos
 
 }
-=======
-}
->>>>>>> 6433420eb1f0463278e6800c0c604398f9245208
