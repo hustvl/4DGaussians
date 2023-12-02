@@ -242,7 +242,7 @@ def generateCamerasFromTransforms(path, template_transformsfile, extension, maxt
         im_data = np.array(image.convert("RGBA"))
         image = PILtoTorch(image,(800,800))
         break
-    # format infomation
+    # format information
     for idx, (time, poses) in enumerate(zip(render_times,render_poses)):
         time = time/maxtime
         matrix = np.linalg.inv(np.array(poses))
@@ -640,6 +640,10 @@ sceneLoadTypeCallbacks = {
     "Blender" : readNerfSyntheticInfo,
     "dynerf" : readdynerfInfo,
     "nerfies": readHyperDataInfos,  # NeRFies & HyperNeRF dataset proposed by [https://github.com/google/hypernerf/releases/tag/v0.1]
+<<<<<<< HEAD
     "PanopticSports" : readPanopticSportsinfos
 
 }
+=======
+}
+>>>>>>> 6433420eb1f0463278e6800c0c604398f9245208
