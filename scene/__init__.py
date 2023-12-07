@@ -51,6 +51,8 @@ class Scene:
             scene_info = sceneLoadTypeCallbacks["dynerf"](args.source_path, args.white_background, args.eval)
         elif os.path.exists(os.path.join(args.source_path,"dataset.json")):
             scene_info = sceneLoadTypeCallbacks["nerfies"](args.source_path, False, args.eval)
+        elif os.path.exists(os.path.join(args.source_path,"poses_bounds_spaceport.npy")):
+            scene_info = sceneLoadTypeCallbacks["spaceport"](args.source_path, args.white_background, args.eval)
         else:
             assert False, "Could not recognize scene type!"
         self.maxtime = scene_info.maxtime

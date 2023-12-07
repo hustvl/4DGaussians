@@ -448,7 +448,7 @@ def readdynerfInfo(datadir,use_bg_points,eval):
     # if not os.path.exists(ply_path):
     # Since this data set has no colmap data, we start with random points
     num_pts = 2000
-    print(f"Generating random point cloud ({num_pts})...")
+    # print(f"Generating random point cloud ({num_pts})...")
     threshold = 3
     # xyz_max = np.array([1.5*threshold, 1.5*threshold, 1.5*threshold])
     # xyz_min = np.array([-1.5*threshold, -1.5*threshold, -3*threshold])
@@ -457,7 +457,7 @@ def readdynerfInfo(datadir,use_bg_points,eval):
     # We create random points inside the bounds of the synthetic Blender scenes
     # xyz = (np.random.random((num_pts, 3)))* (xyz_max-xyz_min) + xyz_min
 
-    data = plyfile.PlyData.read('/home/spaceport/Softwares/4DGaussians/output/coffee_martini_2.4K.ply')
+    data = plyfile.PlyData.read('/home/spaceport/Softwares/4DGaussians/output/point_cloud_faruk_cleaned.ply')
     xyz_data = data.elements[0].data
     num_pts = len(xyz_data)
     xyz_list = [list(x) for x in (data.elements[0].data)]
@@ -483,9 +483,127 @@ def readdynerfInfo(datadir,use_bg_points,eval):
                            maxtime=300
                            )
     return scene_info
+def readSpaceportInfo(datadir,use_bg_points,eval):
+    ply_path = os.path.join(datadir, "points3d.ply")
+    print("ply_path spaceport: ", ply_path)
+    # implement class for spaceportdataset
+    print("Inside readSpaceportInfo Loading data from: ", datadir)
+    from scene.spaceport_dataset import SpaceportDataset
+    
+    train_dataset = SpaceportDataset(
+        datadir,
+        "train",
+        1.0,
+        time_scale=1,
+        scene_bbox_min=[-2.5, -2.0, -1.0],
+        scene_bbox_max=[2.5, 2.0, 1.0],
+        eval_index=0,
+        )
+    
+    test_dataset = SpaceportDataset(
+        datadir,
+        "test",
+        1.0,
+        time_scale=1,
+        scene_bbox_min=[-2.5, -2.0, -1.0],
+        scene_bbox_max=[2.5, 2.0, 1.0],
+        eval_index=0,
+        )
+    
+    max_time = len(os.listdir(os.path.join(datadir,"cam01","images")))
+    train_cam_infos = format_infos(train_dataset,"train")
+    val_cam_infos = format_render_poses(test_dataset.val_poses,test_dataset)
+    nerf_normalization = getNerfppNorm(train_cam_infos)
+
+    initialize_pcd_randomly = False
+
+    if initialize_pcd_randomly:
+        num_pts = 2000
+        print(f"Generating random point cloud ({num_pts})...")
+        threshold = 2
+
+        xyz_max = np.array([1.5*threshold, 1.5*threshold, 1.5*threshold])
+        xyz_min = np.array([-1.5*threshold, -1.5*threshold, -1.5*threshold])
+
+        # Create random points inside the bounds of the scene
+        xyz = (np.random.random((num_pts, 3)))* (xyz_max-xyz_min) + xyz_min
+
+        print("point cloud initialization:",xyz.max(axis=0),xyz.min(axis=0))
+        shs = np.random.random((num_pts, 3)) / 255.0
+        pcd = BasicPointCloud(points=xyz, colors=SH2RGB(shs), normals=np.zeros((num_pts, 3)))
+        storePly(ply_path, xyz, SH2RGB(shs) * 255)
+    else:
+        from_colmap = False
+        if not from_colmap:
+            print("ply_path: ", ply_path)
+            ply_path = '/home/spaceport/Softwares/4DGaussians/output/point_cloud_faruk_cleaned.ply'
+            plydata = PlyData.read(ply_path)
+            vertices = plydata['vertex']
+            num_pts = len(vertices['x'])
+            xyz_new = np.column_stack((vertices['x'], vertices['y'], vertices['z']))
+            shs = np.random.random((num_pts, 3)) / 255.0
+            pcd = BasicPointCloud(points=xyz_new, colors=SH2RGB(shs), normals=np.zeros((num_pts, 3)))
+            storePly(ply_path, xyz_new, SH2RGB(shs) * 255)
+            print("size of plydata: ", xyz_new.shape)
+
+        else:
+            # base_dir is the parent directory of the datadir
+            base_dir = os.path.dirname(datadir)
+            print(base_dir)
+            print("*******************")
+            # Construct the path for the desired file using the base directory
+            points_file_path = os.path.join(base_dir, "undistorted_LLFF_input/sparse/0/points3D.txt")
+
+            # Assuming the text file is saved as 'points.txt'
+            ply_path = base_dir + '/undistorted/points3d.ply'
+
+            #ply_path = '/media/hamit/Elements1/23_11_2023_DATA/data_lum90_close_green_all/542-632_undistorted/points3d.ply'
+            print("points_file_path: ", ply_path)
+            #points_file_path = '/media/hamit/Elements1/23_11_2023_DATA/data_lum90_close_green_all/single_cam_undistorted_for_LLFF/sparse/0/points3D.txt'
+            # Read the points data from the text file
+            points = []
+            with open(points_file_path, 'r') as file:
+                for line in file:
+                    if line.startswith('#') or not line.strip():
+                        continue  # Skip comments and empty lines
+                    parts = line.split()
+                    x, y, z = float(parts[1]), float(parts[2]), float(parts[3])
+                    points.append([x, y, z])
+
+            # Convert points to numpy array
+            xyz_new = np.array(points)
+
+            # Generating random colors and normals for the point cloud
+            num_pts = xyz_new.shape[0]
+            shs = np.random.random((num_pts, 3)) / 255.0
+            pcd = BasicPointCloud(points=xyz_new, colors=SH2RGB(shs), normals=np.zeros((num_pts, 3)))
+            storePly(ply_path, xyz_new, SH2RGB(shs) * 255)
+
+            print("size of plydata: ", xyz_new.shape, ply_path)
+
+    try:
+        # xyz = np.load
+        pcd = fetchPly(ply_path)
+        print('fetching ply: ', ply_path)
+    except:
+    #    pcd = None
+        print("No ply file found")
+    print("train_dataset: ", len(train_dataset))
+    scene_info = SceneInfo(point_cloud=pcd,
+                           train_cameras=train_dataset,
+                           test_cameras=test_dataset,
+                           video_cameras=val_cam_infos,
+                           nerf_normalization=nerf_normalization,
+                           ply_path=ply_path,
+                           maxtime=max_time
+                           )
+    print("scene_info: ", scene_info.point_cloud)
+    return scene_info
 sceneLoadTypeCallbacks = {
     "Colmap": readColmapSceneInfo,
     "Blender" : readNerfSyntheticInfo,
     "dynerf" : readdynerfInfo,
     "nerfies": readHyperDataInfos,  # NeRFies & HyperNeRF dataset proposed by [https://github.com/google/hypernerf/releases/tag/v0.1]
+    "spaceport": readSpaceportInfo
+
 }
