@@ -1,6 +1,6 @@
 # 4D Gaussian Splatting for Real-Time Dynamic Scene Rendering
 
-## arXiv Preprint
+## ArXiv Preprint
 
 ### [Project Page](https://guanjunwu.github.io/4dgs/index.html)| [arXiv Paper](https://arxiv.org/abs/2310.08528)
 
@@ -14,20 +14,11 @@
 
 ---------------------------------------------------
 
----
-
-![block](assets/teaserfig.png)   
+![block](assets/teaserfig.jpg)   
 Our method converges very quickly and achieves real-time rendering speed.
 
 Colab demo:[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hustvl/4DGaussians/blob/master/4DGaussians.ipynb) (Thanks [camenduru](https://github.com/camenduru/4DGaussians-colab).)
 
-<video width="320" height="240" controls>
-  <source src="assets/teaservideo.mp4" type="video/mp4">
-</video>
-
-<video width="320" height="240" controls>
-  <source src="assets/cut_roasted_beef_time.mp4" type="video/mp4">
-</video>
 
 
 ## Environmental Setups
@@ -98,9 +89,57 @@ You can just run the following script to evaluate the model.
 ```
 python metrics.py --model_path "output/dnerf/bouncingballs/" 
 ```
+## Custom Datasets
+Install nerfstudio and follow their colmap pipeline.
+
+```
+pip install nerfstudio
+ns-process-data images --data data/your-data --output-dir data/your-ns-data
+python train.py -s data/your-ns-data --port 6017 --expname "custom" --configs arguments/hypernerf/default.py 
+
+```
+
 ## Scripts
 
-There are some helpful scripts in `scripts/`, please feel free to use them.
+There are some helpful scripts in , please feel free to use them.
+
+`vis_point.py`:
+get all points clouds at each timestamps.
+
+usage:
+```python
+export exp_name="hypernerf"
+python vis_point.py --model_path output/$exp_name/interp/aleks-teapot --configs arguments/$exp_name/default.py 
+```
+
+`weight_visualization.ipynb`:
+
+visualize the weight of Multi-resolution HexPlane module.
+
+`merge_many_4dgs.py`:
+merge your trained 4dgs.
+usage:
+```python
+export exp_name="dynerf"
+python merge_many_4dgs.py --model_path output/$exp_name/flame_salmon_1
+```
+
+`colmap.sh`:
+generate point clouds from input data
+```bash
+bash colmap.sh data/hypernerf/virg/vrig-chicken hypernerf 
+bash colmap.sh data/dynerf/flame_salmon_1 llff
+```
+
+**Blender** format seems doesn't work. Welcome to raise a pull request to fix it.
+
+`downsample_point.py` :downsample generated point clouds by sfm.
+```python
+python scripts/downsample_point.py data/dynerf/sear_steak/points3D_downsample.ply data/dynerf/sear_steak/points3D_downsample2.ply
+```
+In my paper, I always use `colmap.sh` to generate dense point clouds and downsample it to less than 40000 points.
+
+Here are some codes maybe useful but never adopted in my paper, you can also try it.
 
 ---
 ## Contributions
@@ -108,7 +147,7 @@ There are some helpful scripts in `scripts/`, please feel free to use them.
 **This project is still under development. Please feel free to raise issues or submit pull requests to contribute to our codebase.**
 
 ---
-Some source code of ours is borrowed from [3DGS](https://github.com/graphdeco-inria/gaussian-splatting), [k-planes](https://github.com/Giodiro/kplanes_nerfstudio),[HexPlane](https://github.com/Caoang327/HexPlane), [TiNeuVox](https://github.com/hustvl/TiNeuVox). We sincerely appreciate the excellent works of these authors.
+Some source code of ours is borrowed from [3DGS](https://github.com/graphdeco-inria/gaussian-splatting), [k-planes](https://github.com/Giodiro/kplanes_nerfstudio),[HexPlane](https://github.com/Caoang327/HexPlane), [TiNeuVox](https://github.com/hustvl/TiNeuVox). We sincerely appreciate the excellent works of these authors.
 
 ## Acknowledgement
 

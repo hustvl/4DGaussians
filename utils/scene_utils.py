@@ -8,10 +8,10 @@ import numpy as np
 
 import copy
 @torch.no_grad()
-def render_training_image(scene, gaussians, viewpoints, render_func, pipe, background, stage, iteration, time_now):
-    def render(gaussians, viewpoint, path, scaling):
+def render_training_image(scene, gaussians, viewpoints, render_func, pipe, background, stage, iteration, time_now, dataset_type):
+    def render(gaussians, viewpoint, path, scaling, cam_type):
         # scaling_copy = gaussians._scaling
-        render_pkg = render_func(viewpoint, gaussians, pipe, background, stage=stage)
+        render_pkg = render_func(viewpoint, gaussians, pipe, background, stage=stage, cam_type=cam_type)
         label1 = f"stage:{stage},iter:{iteration}"
         times =  time_now/60
         if times < 1:
@@ -21,11 +21,15 @@ def render_training_image(scene, gaussians, viewpoints, render_func, pipe, backg
         label2 = "time:%.2f" % times + end
         image = render_pkg["render"]
         depth = render_pkg["depth"]
+        if dataset_type == "PanopticSports":
+            gt_np = viewpoint['image'].permute(1,2,0).cpu().numpy()
+        else:
+            gt_np = viewpoint.original_image.permute(1,2,0).cpu().numpy()
         image_np = image.permute(1, 2, 0).cpu().numpy()  # 转换通道顺序为 (H, W, 3)
         depth_np = depth.permute(1, 2, 0).cpu().numpy()
         depth_np /= depth_np.max()
         depth_np = np.repeat(depth_np, 3, axis=2)
-        image_np = np.concatenate((image_np, depth_np), axis=1)
+        image_np = np.concatenate((gt_np, image_np, depth_np), axis=1)
         image_with_labels = Image.fromarray((np.clip(image_np,0,1) * 255).astype('uint8'))  # 转换为8位图像
         # 创建PIL图像对象的副本以绘制标签
         draw1 = ImageDraw.Draw(image_with_labels)
@@ -59,7 +63,7 @@ def render_training_image(scene, gaussians, viewpoints, render_func, pipe, backg
     # point_save_path = os.path.join(point_cloud_path,f"{iteration}.jpg")
     for idx in range(len(viewpoints)):
         image_save_path = os.path.join(image_path,f"{iteration}_{idx}.jpg")
-        render(gaussians,viewpoints[idx],image_save_path,scaling = 1)
+        render(gaussians,viewpoints[idx],image_save_path,scaling = 1,cam_type=dataset_type)
     # render(gaussians,point_save_path,scaling = 0.1)
     # 保存带有标签的图像
 
