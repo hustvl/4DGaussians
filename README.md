@@ -122,21 +122,21 @@ merge your trained 4dgs.
 usage:
 ```python
 export exp_name="dynerf"
-python merge_many_4dgs.py --model_path output/$exp_name/flame_salmon_1
+python merge_many_4dgs.py --model_path output/$exp_name/sear_steak
 ```
 
 `colmap.sh`:
 generate point clouds from input data
 ```bash
 bash colmap.sh data/hypernerf/virg/vrig-chicken hypernerf 
-bash colmap.sh data/dynerf/flame_salmon_1 llff
+bash colmap.sh data/dynerf/sear_steak llff
 ```
 
 **Blender** format seems doesn't work. Welcome to raise a pull request to fix it.
 
 `downsample_point.py` :downsample generated point clouds by sfm.
 ```python
-python scripts/downsample_point.py data/dynerf/sear_steak/points3D_downsample.ply data/dynerf/sear_steak/points3D_downsample2.ply
+python scripts/downsample_point.py data/dynerf/sear_steak/colmap/dense/workspace/fused.ply data/dynerf/sear_steak/points3D_downsample2.ply
 ```
 In my paper, I always use `colmap.sh` to generate dense point clouds and downsample it to less than 40000 points.
 
