@@ -6,4 +6,5 @@ matplotlib
 argparse
 lpips
 plyfile
-imageio-ffmpeg
+pytorch_msssim
+open3d
