@@ -332,8 +332,7 @@ def readNerfSyntheticInfo(path, white_background, eval, extension=".png"):
         print(f"Generating random point cloud ({num_pts})...")
 
         # We create random points inside the bounds of the synthetic Blender scenes
-        # xyz = np.random.random((num_pts, 3)) * 2.6 - 1.3
-        xyz = np.random.random((num_pts, 3)) * 0.5 - 0.25
+        xyz = np.random.random((num_pts, 3)) * 2.6 - 1.3
         shs = np.random.random((num_pts, 3)) / 255.0
         pcd = BasicPointCloud(points=xyz, colors=SH2RGB(shs), normals=np.zeros((num_pts, 3)))
     # storePly(ply_path, xyz, SH2RGB(shs) * 255)
@@ -382,20 +381,11 @@ def readHyperDataInfos(datadir,use_bg_points,eval):
     video_cam_infos = copy.deepcopy(test_cam_infos)
     video_cam_infos.split="video"
 
-    # ply_path = os.path.join(datadir, "points.npy")
-    
-    # xyz = np.load(ply_path,allow_pickle=True)
-    # xyz -= train_cam_infos.scene_center
-    # xyz *= train_cam_infos.coord_scale
-    # xyz = xyz.astype(np.float32)
-    # shs = np.random.random((xyz.shape[0], 3)) / 255.0
-    # pcd = BasicPointCloud(points=xyz, colors=SH2RGB(shs), normals=np.zeros((xyz.shape[0], 3)))
+
     ply_path = os.path.join(datadir, "points3D_downsample.ply")
-    # ply_path = os.path.join(datadir, "points3D.ply")
     pcd = fetchPly(ply_path)
     xyz = np.array(pcd.points)
-    # xyz -= train_cam_infos.scene_center
-    # xyz *= train_cam_infos.coord_scale
+
     pcd = pcd._replace(points=xyz)
     nerf_normalization = getNerfppNorm(train_cam)
     plot_camera_orientations(train_cam_infos, pcd.points)
@@ -433,12 +423,7 @@ def format_render_poses(poses,data_infos):
                             image_path=image_path, image_name=image_name, width=image.shape[2], height=image.shape[1],
                             time = time, mask=None))
     return cameras
-    # plydata = PlyData.read(path)
-    # vertices = plydata['vertex']
-    # positions = np.vstack([vertices['x'], vertices['y'], vertices['z']]).T
-    # colors = np.vstack([vertices['red'], vertices['green'], vertices['blue']]).T / 255.0
-    # normals = np.vstack([vertices['nx'], vertices['ny'], vertices['nz']]).T
-    # return BasicPointCloud(points=positions, colors=colors, normals=normals)
+
 def add_points(pointsclouds, xyz_min, xyz_max):
     add_points = (np.random.random((100000, 3)))* (xyz_max-xyz_min) + xyz_min
     add_points = add_points.astype(np.float32)
@@ -478,26 +463,8 @@ def readdynerfInfo(datadir,use_bg_points,eval):
     eval_index=0,
         )
     train_cam_infos = format_infos(train_dataset,"train")
-    
-    # test_cam_infos = format_infos(test_dataset,"test")
     val_cam_infos = format_render_poses(test_dataset.val_poses,test_dataset)
     nerf_normalization = getNerfppNorm(train_cam_infos)
-    # create pcd
-    # if not os.path.exists(ply_path):
-    # Since this data set has no colmap data, we start with random points
-    # num_pts = 2000
-    # print(f"Generating random point cloud ({num_pts})...")
-    # threshold = 3
-    # xyz_max = np.array([1.5*threshold, 1.5*threshold, 1.5*threshold])
-    # xyz_min = np.array([-1.5*threshold, -1.5*threshold, -3*threshold])
-    # xyz_max = np.array([1.5*threshold, 1.5*threshold, 1.5*threshold])
-    # xyz_min = np.array([-1.5*threshold, -1.5*threshold, -1.5*threshold])
-    # We create random points inside the bounds of the synthetic Blender scenes
-    # xyz = (np.random.random((num_pts, 3)))* (xyz_max-xyz_min) + xyz_min
-    # print("point cloud initialization:",xyz.max(axis=0),xyz.min(axis=0))
-    # shs = np.random.random((num_pts, 3)) / 255.0
-    # pcd = BasicPointCloud(points=xyz, colors=SH2RGB(shs), normals=np.zeros((num_pts, 3)))
-    # storePly(ply_path, xyz, SH2RGB(shs) * 255)
 
     # xyz = np.load
     pcd = fetchPly(ply_path)
@@ -557,12 +524,9 @@ def plot_camera_orientations(cam_list, xyz):
         # 提取 R 和 T
         R = cam.R
         T = cam.T
-        # print(R,T)
-        # breakpoint()
-        # 计算相机朝向（一个单位向量）
+
         direction = R @ np.array([0, 0, 1])
 
-        # 绘制相机位置和朝向
         ax.quiver(T[0], T[1], T[2], direction[0], direction[1], direction[2], length=1)
 
     ax.set_xlabel('X Axis')
