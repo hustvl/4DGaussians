@@ -19,7 +19,7 @@ from scene.dataset import FourDGSdataset
 from arguments import ModelParams
 from utils.camera_utils import cameraList_from_camInfos, camera_to_JSON
 from torch.utils.data import Dataset
-
+from scene.dataset_readers import add_points
 class Scene:
 
     gaussians : GaussianModel
@@ -43,56 +43,41 @@ class Scene:
         self.test_cameras = {}
         self.video_cameras = {}
         if os.path.exists(os.path.join(args.source_path, "sparse")):
-            scene_info = sceneLoadTypeCallbacks["Colmap"](args.source_path, args.images, args.eval)
+            scene_info = sceneLoadTypeCallbacks["Colmap"](args.source_path, args.images, args.eval, args.llffhold)
+            dataset_type="colmap"
         elif os.path.exists(os.path.join(args.source_path, "transforms_train.json")):
             print("Found transforms_train.json file, assuming Blender data set!")
-            scene_info = sceneLoadTypeCallbacks["Blender"](args.source_path, args.white_background, args.eval)
+            scene_info = sceneLoadTypeCallbacks["Blender"](args.source_path, args.white_background, args.eval, args.extension)
+            dataset_type="blender"
         elif os.path.exists(os.path.join(args.source_path, "poses_bounds.npy")):
             scene_info = sceneLoadTypeCallbacks["dynerf"](args.source_path, args.white_background, args.eval)
+            dataset_type="dynerf"
         elif os.path.exists(os.path.join(args.source_path,"dataset.json")):
             scene_info = sceneLoadTypeCallbacks["nerfies"](args.source_path, False, args.eval)
-        elif os.path.exists(os.path.join(args.source_path,"poses_bounds_spaceport.npy")):
-            scene_info = sceneLoadTypeCallbacks["spaceport"](args.source_path, args.white_background, args.eval)
+            dataset_type="nerfies"
+        elif os.path.exists(os.path.join(args.source_path,"train_meta.json")):
+            scene_info = sceneLoadTypeCallbacks["PanopticSports"](args.source_path)
+            dataset_type="PanopticSports"
         else:
             assert False, "Could not recognize scene type!"
         self.maxtime = scene_info.maxtime
-        # if not self.loaded_iter:
-        #     with open(scene_info.ply_path, 'rb') as src_file, open(os.path.join(self.model_path, "input.ply") , 'wb') as dest_file:
-        #         dest_file.write(src_file.read())
-        #     json_cams = []
-        #     camlist = []
-        #     if scene_info.test_cameras:
-        #         camlist.extend(scene_info.test_cameras)
-        #     if scene_info.train_cameras:
-        #         camlist.extend(scene_info.train_cameras)
-            
-        #     for id, cam in enumerate(camlist):
-        #         json_cams.append(camera_to_JSON(id, cam))
-        #     with open(os.path.join(self.model_path, "cameras.json"), 'w') as file:
-        #         json.dump(json_cams, file)
-
-        # if shuffle:
-        #     random.shuffle(scene_info.train_cameras)  # Multi-res consistent random shuffling
-        #     random.shuffle(scene_info.test_cameras)  # Multi-res consistent random shuffling
-
+        self.dataset_type = dataset_type
         self.cameras_extent = scene_info.nerf_normalization["radius"]
-
-        # for resolution_scale in resolution_scales:
-            # print("Loading Training Cameras")
-            # self.train_cameras[resolution_scale] = cameraList_from_camInfos(scene_info.train_cameras, resolution_scale, args)
-            # print("Loading Test Cameras")
-            # self.test_cameras[resolution_scale] = cameraList_from_camInfos(scene_info.test_cameras, resolution_scale, args)
-            # print("Loading Video Cameras")
-            # self.video_cameras[resolution_scale] = cameraList_from_camInfos(scene_info.video_cameras, resolution_scale, args)
         print("Loading Training Cameras")
-        self.train_camera = FourDGSdataset(scene_info.train_cameras, args)
+        self.train_camera = FourDGSdataset(scene_info.train_cameras, args, dataset_type)
         print("Loading Test Cameras")
-        self.test_camera = FourDGSdataset(scene_info.test_cameras, args)
+        self.test_camera = FourDGSdataset(scene_info.test_cameras, args, dataset_type)
         print("Loading Video Cameras")
-        self.video_camera = cameraList_from_camInfos(scene_info.video_cameras,-1,args)
+        self.video_camera = FourDGSdataset(scene_info.video_cameras, args, dataset_type)
+
+        # self.video_camera = cameraList_from_camInfos(scene_info.video_cameras,-1,args)
         xyz_max = scene_info.point_cloud.points.max(axis=0)
         xyz_min = scene_info.point_cloud.points.min(axis=0)
-        self.gaussians._deformation.deformation_net.grid.set_aabb(xyz_max,xyz_min)
+        if args.add_points:
+            print("add points.")
+            # breakpoint()
+            scene_info = scene_info._replace(point_cloud=add_points(scene_info.point_cloud, xyz_max=xyz_max, xyz_min=xyz_min))
+        self.gaussians._deformation.deformation_net.set_aabb(xyz_max,xyz_min)
         if self.loaded_iter:
             self.gaussians.load_ply(os.path.join(self.model_path,
                                                            "point_cloud",
@@ -102,16 +87,6 @@ class Scene:
                                                     "point_cloud",
                                                     "iteration_" + str(self.loaded_iter),
                                                    ))
-        # elif load_coarse:
-        #     self.gaussians.load_ply(os.path.join(self.model_path,
-        #                                                    "point_cloud",
-        #                                                    "coarse_iteration_" + str(load_coarse),
-        #                                                    "point_cloud.ply"))
-        #     self.gaussians.load_model(os.path.join(self.model_path,
-        #                                             "point_cloud",
-        #                                             "coarse_iteration_" + str(load_coarse),
-        #                                            ))
-        #     print("load coarse stage gaussians")
         else:
             self.gaussians.create_from_pcd(scene_info.point_cloud, self.cameras_extent, self.maxtime)
 
