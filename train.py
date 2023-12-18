@@ -46,7 +46,9 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
     gaussians.training_setup(opt)
     if checkpoint:
         breakpoint()
-        (model_params, first_iter) = torch.load(checkpoint)
+        # (model_params, first_iter) = torch.load(checkpoint)
+        model_params =  torch.load(checkpoint)
+        first_iter = 30000
         gaussians.restore(model_params, opt)
 
     bg_color = [1, 1, 1] if dataset.white_background else [0, 0, 0]

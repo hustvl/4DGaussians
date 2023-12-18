@@ -90,7 +90,7 @@ def viewmatrix(z, up, pos):
     vec0 = normalize(np.cross(vec1_avg, vec2))
     vec1 = normalize(np.cross(vec2, vec0))
     m = np.eye(4)
-    m[:3] = np.stack([-vec0, vec1, vec2, pos], 1)
+    m[:3] = np.stack([vec0, vec1, vec2, pos], 1)
     return m
 
 
@@ -226,12 +226,12 @@ class Neural3D_NDC_Dataset(Dataset):
         sphere_scale=1.0,
     ):
         self.img_wh = (
-            int(1352 / downsample),
-            int(1014 / downsample),
+           1912, # int(1352 / downsample),
+           1172, # int(1014 / downsample),
         )  # According to the neural 3D paper, the default resolution is 1024x768
         self.root_dir = datadir
         self.split = split
-        self.downsample = 2704 / self.img_wh[0]
+        self.downsample = downsample #2704 / self.img_wh[0]
         self.is_stack = is_stack
         self.N_vis = N_vis
         self.time_scale = time_scale
@@ -283,7 +283,7 @@ class Neural3D_NDC_Dataset(Dataset):
         # poses[..., 3] /= scale_factor
 
         # Sample N_views poses for validation - NeRF-like camera trajectory.
-        N_views = 300
+        N_views = 200
         self.val_poses = get_spiral(poses, self.near_fars, N_views=N_views)
         # self.val_poses = self.directions
         W, H = self.img_wh
@@ -307,7 +307,7 @@ class Neural3D_NDC_Dataset(Dataset):
         image_times = []
         N_cams = 0
         N_time = 0
-        countss = 300
+        countss = 100
         for index, video_path in enumerate(videos):
             
             if index == self.eval_index:

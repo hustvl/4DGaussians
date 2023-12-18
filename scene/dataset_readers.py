@@ -443,7 +443,8 @@ def add_points(pointsclouds, xyz_min, xyz_max):
 def readdynerfInfo(datadir,use_bg_points,eval):
     # loading all the data follow hexplane format
     # ply_path = os.path.join(datadir, "points3D_dense.ply")
-    ply_path = os.path.join(datadir, "points3D_downsample2.ply")
+    # ply_path = os.path.join(datadir, "points3D_downsample2.ply")
+    ply_path = os.path.join(datadir, "point_cloud_downsampled.ply")
     from scene.neural_3D_dataset_NDC import Neural3D_NDC_Dataset
     train_dataset = Neural3D_NDC_Dataset(
     datadir,
@@ -479,7 +480,7 @@ def readdynerfInfo(datadir,use_bg_points,eval):
                            video_cameras=val_cam_infos,
                            nerf_normalization=nerf_normalization,
                            ply_path=ply_path,
-                           maxtime=300
+                           maxtime=100
                            )
     return scene_info
 

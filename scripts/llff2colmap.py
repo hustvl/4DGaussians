@@ -3,6 +3,7 @@ import os
 import numpy as np
 import glob
 import sys
+from PIL import Image  
 def rotmat2qvec(R):
     Rxx, Ryx, Rzx, Rxy, Ryy, Rzy, Rxz, Ryz, Rzz = R.flat
     K = np.array([
@@ -93,6 +94,7 @@ poses = poses_arr[:, :-2].reshape([-1, 3, 5])  # (N_cams, 3, 5)
 near_fars = poses_arr[:, -2:]
 videos = glob.glob(os.path.join(root_dir, "cam*"))
 videos = sorted(videos)
+print(len(videos), poses_arr.shape)
 assert len(videos) == poses_arr.shape[0]
 H, W, focal = poses[0, :, -1]
 focal = focal/2
@@ -114,6 +116,8 @@ videos = sorted(videos)
 image_paths = []
 for index, video_path in enumerate(videos):
     image_path = os.path.join(video_path,"images","0000.png")
+    if index == 0:
+        width, height = Image.open(image_path).size
     image_paths.append(image_path)
 print(image_paths)
 goal_dir = os.path.join(root_dir,"image_colmap")
@@ -154,8 +158,10 @@ for idx, pose in enumerate(poses):
 # breakpoint()
 
 # write camera infomation.
+print("cameras.txt", os.path.join(colmap_dir,"cameras.txt"))
 object_cameras_file = open(os.path.join(colmap_dir,"cameras.txt"),"w")
-print(1,"SIMPLE_PINHOLE",1352,1014,focal[0],1352/2,1014/2,file=object_cameras_file)
+# print(1,"SIMPLE_PINHOLE",1352,1014,focal[0],1352/2,1014/2,file=object_cameras_file)
+print(1,"SIMPLE_PINHOLE",width,height,focal[0],width/2,height/2,file=object_cameras_file)
 object_point_file = open(os.path.join(colmap_dir,"points3D.txt"),"w")
 
 object_cameras_file.close()
