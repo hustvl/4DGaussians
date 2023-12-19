@@ -116,7 +116,7 @@ def readColmapCameras(cam_extrinsics, cam_intrinsics, images_folder):
         image = PILtoTorch(image,None)
         cam_info = CameraInfo(uid=uid, R=R, T=T, FovY=FovY, FovX=FovX, image=image,
                               image_path=image_path, image_name=image_name, width=width, height=height,
-                              time = 0, mask=None)
+                              time = float(idx/len(cam_extrinsics)), mask=None) # default by monocular settings.
         cam_infos.append(cam_info)
     sys.stdout.write('\n')
     return cam_infos
