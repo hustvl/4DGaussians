@@ -1,0 +1,42 @@
+/**
+ * css for videojs-rotate-player-plugin
+ * With the default plugins for postcss you can
+ * - @import files, they will be inlined during build
+ * - not worry about browser prefixes, they will be handled
+ * - nest selectors. This follows the css specification that is
+ *   currently out on some browsers. See https://tabatkins.github.io/specs/css-nesting/
+ * - custom properties (aka variables) via the var(--var-name) syntax. See
+ *   https://www.w3.org/TR/css-variables-1/
+ */
+
+
+/* Note: all vars must be defined here, there are no "local" vars */
+:root {
+  --main-color: red;
+  --base-font-size: 9;
+  --font-size: 7;
+}
+
+.video-js {
+
+  &.vjs-rotate-player-plugin {
+    /* This class is added to the video.js element by the plugin by default. */
+    display: block;
+  }
+}
+
+.rotate-0 :before{
+  content: 'R';
+}
+
+.rotate-90 :before{
+  content: '90°';
+}
+
+.rotate-180 :before{
+  content: '180°';
+}
+
+.rotate-270 :before{
+  content: '270°';
+}
