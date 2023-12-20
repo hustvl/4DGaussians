@@ -41,14 +41,17 @@ except ImportError:
 def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_iterations, 
                          checkpoint_iterations, checkpoint, debug_from,
                          gaussians, scene, stage, tb_writer, train_iter,timer):
-    first_iter = 0
+    if not scene.loaded_iter:
+        first_iter = 0
+    else:
+        first_iter = scene.loaded_iter
 
     gaussians.training_setup(opt)
     if checkpoint:
         breakpoint()
         # (model_params, first_iter) = torch.load(checkpoint)
         model_params =  torch.load(checkpoint)
-        first_iter = 30000
+        first_iter = 14000
         gaussians.restore(model_params, opt)
 
     bg_color = [1, 1, 1] if dataset.white_background else [0, 0, 0]
@@ -283,11 +286,12 @@ def training(dataset, hyper, opt, pipe, testing_iterations, saving_iterations, c
     gaussians = GaussianModel(dataset.sh_degree, hyper)
     dataset.model_path = args.model_path
     timer = Timer()
-    scene = Scene(dataset, gaussians, load_coarse=None)
+    scene = Scene(dataset, gaussians, load_coarse=None, load_iteration=-1)
     timer.start()
-    scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_iterations,
-                             checkpoint_iterations, checkpoint, debug_from,
-                             gaussians, scene, "coarse", tb_writer, opt.coarse_iterations,timer)
+    if not scene.loaded_iter:
+        scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_iterations,
+                                checkpoint_iterations, checkpoint, debug_from,
+                                gaussians, scene, "coarse", tb_writer, opt.coarse_iterations,timer)
     scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_iterations,
                          checkpoint_iterations, checkpoint, debug_from,
                          gaussians, scene, "fine", tb_writer, opt.iterations,timer)
@@ -387,7 +391,7 @@ if __name__ == "__main__":
     parser.add_argument('--debug_from', type=int, default=-1)
     parser.add_argument('--detect_anomaly', action='store_true', default=False)
     parser.add_argument("--test_iterations", nargs="+", type=int, default=[500*i for i in range(100)])
-    parser.add_argument("--save_iterations", nargs="+", type=int, default=[1000, 3000, 4000, 5000, 6000, 7_000, 9000, 10000, 12000, 14000, 20000, 30_000, 45000, 60000])
+    parser.add_argument("--save_iterations", nargs="+", type=int, default=[1000, 3000, 4000, 5000, 6000, 7_000, 9000, 10000, 12000, 14000, 16000, 20000, 25000, 30_000, 45000, 60000])
     parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--checkpoint_iterations", nargs="+", type=int, default=[])
     parser.add_argument("--start_checkpoint", type=str, default = None)

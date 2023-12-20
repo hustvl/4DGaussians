@@ -141,6 +141,12 @@ python scripts/downsample_point.py data/dynerf/sear_steak/colmap/dense/workspace
 In my paper, I always use `colmap.sh` to generate dense point clouds and downsample it to less than 40000 points.
 
 Here are some codes maybe useful but never adopted in my paper, you can also try it.
+--- 
+## Video Player
+Run the following command to start http server in the 'video_player' folder, then click on the one of the html files under examples.
+```bash
+python -m RangeHTTPServer
+```
 
 ---
 ## Contributions

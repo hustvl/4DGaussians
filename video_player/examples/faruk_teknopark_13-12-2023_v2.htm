@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title> Teknopark Demo</title>
+    <!-- <link rel="stylesheet" href="https://cdn.pannellum.org/2.5/pannellum.css"/> -->
+    <!-- <link rel="stylesheet" href="../src/css/pannellum.css"> -->
+    <link rel="icon" href="./spaceport_logo.png" type="image/png">
+
+   
+    <!-- <script type="text/javascript" src="https://cdn.pannellum.org/2.5/pannellum.js"></script> -->
+
+    <link href="../src/css/video-js.css" rel="stylesheet"
+      type="text/css">
+    <!-- <script type="text/javascript" src="http://vjs.zencdn.net/5.17.0/video.js"></script> -->
+    <script src="https://vjs.zencdn.net/8.0.4/video.min.js"></script>
+
+    <!-- <script src="../src/js/videojs-pannellum-plugin.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="../src/js/videojs-playlist.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link href="https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+
+     <style>
+
+        .vjs-has-started .vjs-loading-spinner {
+            display: none !important;
+        }
+
+        
+        body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        }
+
+        .video-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        }
+
+        #panorama {
+        width: 100%;
+        height: 100%;
+        }
+        .icon {
+        
+        position: absolute; 
+        bottom: 70px;
+        right: 70px;
+        cursor: default;
+        }
+
+
+        .arrow {
+            transition: fill 0.3s; /* Smooth transition for the fill property */
+        }
+
+        .arrow:hover {
+            fill: #ff0000; /* Change the fill color to orange when hovered */
+            cursor: pointer; /* Change cursor to a pointer to indicate interactivity */
+        }
+
+        .extra-info {
+            display: none;
+            line-height: 30px;
+            font-size: 12px;
+            position: absolute;
+            top: 0;
+            left: 50px;
+        
+        }
+
+        .info:hover .extra-info {
+            display: block;
+        }
+
+        .info {
+            font-size: 20px;
+            padding-left: 5px;
+            width: 20px;
+            border-radius: 15px;
+            z-index: 2;
+            position: fixed;
+            left: 5%;
+            top: 80%;
+            color: red;
+        }
+
+        .info:hover {
+            background-color: white;
+            padding: 0 0 0 5px;
+            width: 315px;
+            height: 120px;
+            text-align: left !important;
+            z-index: 99;
+        }
+
+
+        .icon {
+        
+        position: absolute; 
+        bottom: 70px;
+        right: 70px;
+        cursor: default;
+        }
+
+
+        .arrow {
+            transition: fill 0.3s; /* Smooth transition for the fill property */
+        }
+
+        .arrow:hover {
+            fill: #ff0000; /* Change the fill color to orange when hovered */
+            cursor: pointer; /* Change cursor to a pointer to indicate interactivity */
+        }
+        /* Remove pannellum text when left-clicked on the page*/
+
+        /* .pnlm-about-msg {
+            visibility: hidden;
+            a {
+                visibility: hidden;
+            }
+         } */
+    </style>
+
+
+
+</head>
+ <body>
+  <div class="video-container">
+    <div class="info">
+        <i class="icon-info-sign"></i>
+  
+        <span class="extra-info">
+          Use "I-J-K-L" or buttons on the screen to move through the scene. <br>
+          Use "U and H" to move among layers in height.<br>
+          Use Arrow Keys or Mouse to change view.
+        </span>
+      </div>
+    <video id="panorama" class="video-js vjs-big-play-centered " controls="" preload="auto" autoplay="true" width="1440px" height="720px"
+    crossorigin="anonymous" >
+        <!-- <source src="./media/faruk_teknopark_v1/output_grid_16.mp4" type="video/mp4" /> -->
+        <p class="vjs-no-js">
+            To view this video please enable JavaScript, and consider upgrading to
+            a web browser that <a href="http://videojs.com/html5-video-support/"
+            target="_blank">supports HTML5 video</a>
+        </p>
+    </video>
+    <div class = "icon"  id="svg-container"></div>
+
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('./arrows.svg')
+        .then(response => response.text())
+        .then(svgData => {
+            document.getElementById('svg-container').innerHTML = svgData;
+
+            // Add click event listeners to individual triangles
+            var right_arrow = document.getElementById('right-arrow');
+            var left_arrow = document.getElementById('left-arrow');
+            var up_arrow = document.getElementById('up-arrow');
+            var down_arrow = document.getElementById('down-arrow');
+            var middle = document.getElementById('middle');
+
+            right_arrow.addEventListener('click', function(event) {
+
+                window.dispatchEvent(new KeyboardEvent('keydown', {'key': 'l'}));
+            });
+
+            left_arrow.addEventListener('click', function() {
+                window.dispatchEvent(new KeyboardEvent('keydown', {'key': 'j'}));
+            })
+
+            up_arrow.addEventListener('click', function() {
+                window.dispatchEvent(new KeyboardEvent('keydown', {'key': 'i'}));
+            });
+
+            down_arrow.addEventListener('click', function() {
+                window.dispatchEvent(new KeyboardEvent('keydown', {'key': 'k'}));
+            });
+            
+            middle.addEventListener('click', function(){
+                // player.pnlmViewer.setPitch(pitch_init, 0);
+                // player.pnlmViewer.setYaw(yaw_init, 0);
+                // player.pnlmViewer.setHfov(hfov_init, 0);
+                index = index_init
+                player.playlist.currentItem(index);
+
+            });
+
+    
+        })
+        .catch(error => console.error(error));
+
+});
+// const pitch_thres = 180/6;
+// const yaw_thres = 180/8;
+const length = 10;
+const width = 10;
+const height = 1;
+const area = length * width;
+const volume = length * width * height;
+var index_init = 67;
+var index= index_init;
+var h = Math.floor(index / area);
+// var hfov_init= 120.0;
+// var pitch_init = 0.0;
+// var yaw_init= 0.0;
+// var hfov = hfov_init;
+// var pitch = pitch_init;
+// var yaw = yaw_init;
+
+var basepath = "../media/faruk_teknopark_v2";
+
+var player = videojs('panorama');
+
+var list = [];
+for (let i = 0 ; i < volume ; i++) {
+list.push({
+  sources: [{
+    src: basepath + "/output_grid_" + i + ".mp4",
+    type: 'video/mp4'
+  }]});
+
+
+}
+
+player.playlist(list);
+
+// player.pnlmViewer.setPitch(pitch, 0);
+// player.pnlmViewer.setYaw(yaw, 0);
+// player.pnlmViewer.setHfov(hfov, 0);
+
+player.playlist.autoadvance(0);
+player.playlist.currentItem(index);
+player.requestFullscreen();
+
+player.on('ended', function (){
+    console.log("ended", index)
+   
+    if (index < 0) player.playlist.currentItem(0);
+    player.play();
+
+
+})
+
+window.addEventListener('keydown', function(event) {
+
+//  console.log(pitch, yaw);
+
+  var key = event.key; //findKey(pitch, yaw - 90, event.key);
+  console.log(key);
+  var currentTime = player.currentTime();
+  var prev = index;
+  
+  switch (key) {
+      case "j":
+          {               
+              
+              
+            const tmp = index - 1;  
+            index = (tmp + 1) % length == 0 ? index: tmp;
+            // const tmp = index + length;
+            //   index = tmp >= ( h + 1) * area ? index: tmp;
+              
+              
+
+          } 
+              
+          break;
+
+      case "l":
+          {
+            // const tmp = index - length;
+            //   index = tmp < h * area ? index: tmp; 
+               const tmp = index + 1;  
+              index = tmp % length == 0 ? index: tmp;
+          }
+
+          break;
+
+      case "i":
+          {
+            //   const tmp = index + 1;  
+            //   index = tmp % length == 0 ? index: tmp;
+              const tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+             
+             
+          }
+          break;
+
+      case "k":
+          {
+            // const tmp = index - 1;  
+            //   index = (tmp + 1) % length == 0 ? index: tmp;
+            const tmp = index + length;  
+            index = tmp >= ( h + 1) * area ? index: tmp;
+             
+       
+          }
+
+          break;
+
+      case "u":
+          {
+              h++;
+              const tmp = index + area;
+              if (h < height) index = tmp;
+              else h = height -1;
+              
+          
+          }
+          break;
+
+      case "h":
+          {
+              h--;
+              const tmp = index - area;
+              if (h < 0) h = 0;
+              else index = tmp;
+              
+
+
+          }
+
+          break;
+
+      case "li":
+          {
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+
+              tmp = index + 1;  
+              index = tmp % length == 0 ? index: tmp;
+              
+
+
+          }
+          break;
+
+      case "ij":
+          {
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+
+              tmp = index + 1;  
+              index = tmp % length == 0 ? index: tmp;
+        
+              
+          }
+          break;
+
+      case "jk": 
+          {
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+
+              tmp = index - 1;  
+              index = (tmp + 1) % length == 0 ? index: tmp;
+            
+
+          }
+          break;
+
+      case "kl":
+          {
+
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+              tmp = index - 1;  
+              index = (tmp + 1) % length == 0 ? index: tmp;
+             
+
+          }
+          break;
+
+      case "ui":
+          {
+              
+              
+              let tmp = index + 1;  
+              index = tmp % length == 0 ? index: tmp;
+              h++;
+              tmp = index + area;
+              if (h < height) index = tmp;
+              else h = height -1;
+        
+
+
+          }
+          break;
+      
+      case "hk":
+          {
+              let tmp = index - 1;  
+              index = (tmp + 1) % length == 0 ? index: tmp;
+              h--;
+              tmp = index - area;
+              if (h < 0) h = 0;
+              else index = tmp;
+        
+
+
+
+          }
+          break;
+
+      case "hi":
+          {
+              
+              let tmp = index + 1;  
+              index = tmp % length == 0 ? index: tmp;
+              h--;
+              tmp = index - area;
+              if (h < 0) h = 0;
+              else index = tmp;
+         
+
+          }
+          break;
+      
+      case "uk": 
+          {
+              let tmp = index - 1;  
+              index = (tmp + 1) % length == 0 ? index: tmp;
+              h++;
+              tmp = index + area;
+              if (h < height) index = tmp;
+              else h = height -1;
+           
+
+          }
+          break;
+      
+      case "ul":
+          {
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+              h++;
+              tmp = index + area;
+              if (h < height) index = tmp;
+              else h = height -1;
+          
+
+          } 
+          break; 
+
+      case "hj":
+          {
+
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+              h--;
+              tmp = index - area;
+              if (h < 0) h = 0;
+              else index = tmp;
+           
+
+          }
+          break;
+
+      case "hl":
+
+          {
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+              h--;
+              tmp = index - area;
+              if (h < 0) h = 0;
+              else index = tmp;
+            
+
+          }
+          break;
+      
+      case "uj": 
+          {
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+              h++;
+              tmp = index + area;
+              if (h < height) index = tmp;
+              else h = height -1;
+            
+          }
+          break;
+
+      case "uli":
+          {
+
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+              tmp = index + 1;  
+              index = tmp % length == 0 ? index: tmp;
+              h++;
+              tmp = index + area;
+              if (h < height) index = tmp;
+              else h = height -1;
+        
+          }
+          break;
+
+      case "hjk":
+          {
+
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+              tmp = index - 1;  
+              index = (tmp + 1) % length == 0 ? index: tmp;
+              h--;
+              tmp = index - area;
+              if (h < 0) h = 0;
+              else index = tmp;
+         
+          }
+          break;
+      
+      case "hli":
+          {
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+              tmp = index + 1;  
+              index = tmp % length == 0 ? index: tmp;
+              h--;
+              tmp = index - area;
+              if (h < 0) h = 0;
+              else index = tmp;
+
+          }
+          break;
+
+      case "ujk":
+          {
+
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+              tmp = index - 1;  
+              index = (tmp + 1) % length == 0 ? index: tmp;
+              h++;
+              tmp = index + area;
+              if (h < height) index = tmp;
+              else h = height -1;
+         
+          }
+          break;
+      
+      
+      case "ukl":
+          {
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+              tmp = index - 1;  
+              index = (tmp + 1) % length == 0 ? index: tmp;
+              h++;
+              tmp = index + area;
+              if (h < height) index = tmp;
+              else h = height -1;
+            
+          }
+          break;
+      
+      case "hij":
+
+          {
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+              tmp = index + 1;  
+              index = tmp % length == 0 ? index: tmp;
+              h--;
+              tmp = index - area;
+              if (h < 0) h = 0;
+              else index = tmp;
+           
+
+          }
+          break;
+
+      case "hkl":
+
+          {
+              let tmp = index - length;
+              index = tmp < h * area ? index: tmp; 
+              tmp = index - 1;  
+              index = (tmp + 1) % length == 0 ? index: tmp;
+              h--;
+              tmp = index - area;
+              if (h < 0) h = 0;
+              else index = tmp;
+         
+
+          }
+          break;
+
+      case "uij" : 
+          {
+              let tmp = index + length;
+              index = tmp >= ( h + 1) * area ? index: tmp;
+              tmp = index + 1;  
+              index = tmp % length == 0 ? index: tmp;
+              h++;
+              tmp = index + area;
+              if (h < height) index = tmp;
+              else h = height -1;
+        
+          }
+          break;
+
+      case "ArrowUp":
+        // pitch = player.pnlmViewer.getPitch();
+        // yaw = player.pnlmViewer.getYaw();
+
+        return;
+
+
+      case "ArrowDown":
+        // pitch = player.pnlmViewer.getPitch();
+        // yaw = player.pnlmViewer.getYaw();
+
+        return;   
+      case "ArrowLeft":
+        // pitch = player.pnlmViewer.getPitch();
+        // yaw = player.pnlmViewer.getYaw();
+
+        return;
+
+
+      case "ArrowRight":
+        // pitch = player.pnlmViewer.getPitch();
+        // yaw = player.pnlmViewer.getYaw();
+
+        return; 
+
+      default:
+        return;
+
+
+
+
+  }
+
+    // player.pnlmViewer.setPitch(pitch, 0);
+    // player.pnlmViewer.setYaw(yaw, 0);
+    // player.pnlmViewer.setHfov(hfov, 0);
+    console.log(index);
+    if (prev !== index) {
+    player.playlist.currentItem(index);
+
+    setTimeout(()=> {player.currentTime(currentTime);}, 1);
+    }
+
+
+ 
+});
+
+window.addEventListener( 'mouseup', function (event){
+
+    // console.log(pitch, yaw, hfov)
+    // pitch = player.pnlmViewer.getPitch();
+    // yaw = player.pnlmViewer.getYaw();
+
+}, false );
+
+window.addEventListener("wheel", (event) =>{
+    // hfov = player.pnlmViewer.getHfov();
+
+}, false);
+
+function findKey(pitch, yaw, key) {
+    if (yaw > 180) yaw = yaw - 360;
+
+    key =  key.replace(/\ı/g, "i");
+
+    if (!(pitch > pitch_thres || pitch < -pitch_thres) && !(yaw > yaw_thres || yaw < -yaw_thres)) {
+        
+
+    } else if (pitch > pitch_thres && !(yaw > yaw_thres || yaw < -yaw_thres)  )   {
+        if (key=="i") key = "ui";
+        else if (key=="j") key = "j";
+        else if (key=="k") key = "hk";
+        else if (key=="l") key = "l";
+    } else if (pitch < -pitch_thres && !(yaw > yaw_thres || yaw < -yaw_thres)  )   {
+        if (key=="i") key = "hi";
+        else if (key=="j") key = "j";
+        else if (key=="k") key = "uk";
+        else if (key=="l") key = "l";
+    } 
+    
+    else if (!(pitch > pitch_thres || pitch < -pitch_thres) && (yaw > yaw_thres && yaw < 3*yaw_thres) ){
+        if (key=="i") key = "li";
+        else if (key=="j") key = "ij";
+        else if (key=="k") key = "jk";
+        else if (key=="l") key = "kl";
+    } else if ( pitch > pitch_thres && (yaw > yaw_thres && yaw < 3*yaw_thres) ) {
+        if (key=="i") key = "uli";
+        else if (key=="j") key = "ij";
+        else if (key=="k") key = "hjk";
+        else if (key=="l") key = "kl";
+    } else if ( pitch < -pitch_thres && (yaw > yaw_thres && yaw < 3*yaw_thres) ) {
+        if (key=="i") key = "hli";
+        else if (key=="j") key = "ij";
+        else if (key=="k") key = "ujk";
+        else if (key=="l") key = "kl";
+    }
+    
+    else if (!(pitch > pitch_thres || pitch < -pitch_thres) && (yaw > 3*yaw_thres && yaw < 5*yaw_thres) ) {
+        if (key=="i") key = "l";
+        else if (key=="j") key = "i";
+        else if (key=="k") key = "j";
+        else if (key=="l") key = "k";
+    } else if ( pitch > pitch_thres && (yaw > 3*yaw_thres && yaw < 5*yaw_thres) ) {
+        if (key=="i") key = "ul";
+        else if (key=="j") key = "i";
+        else if (key=="k") key = "hj";
+        else if (key=="l") key = "k";
+    } else if ( pitch < -pitch_thres && (yaw > 3*yaw_thres && yaw < 5*yaw_thres) ) {
+        if (key=="i") key = "hl";
+        else if (key=="j") key = "i";
+        else if (key=="k") key = "uj";
+        else if (key=="l") key = "k";
+    } 
+    
+    else if (!(pitch > pitch_thres || pitch < -pitch_thres) && (yaw > 5*yaw_thres && yaw < 7*yaw_thres) ) {
+        if (key=="i") key = "kl";
+        else if (key=="j") key = "li";
+        else if (key=="k") key = "ij";
+        else if (key=="l") key = "jk";
+
+    } else if (pitch > pitch_thres  && (yaw > 5*yaw_thres && yaw < 7*yaw_thres)) {
+        if (key=="i") key = "ukl";
+        else if (key=="j") key = "li";
+        else if (key=="k") key = "hij";
+        else if (key=="l") key = "jk";
+    }  else if (pitch < -pitch_thres  && (yaw > 5*yaw_thres && yaw < 7*yaw_thres)) {
+        if (key=="i") key = "hkl";
+        else if (key=="j") key = "li";
+        else if (key=="k") key = "uij";
+        else if (key=="l") key = "jk";
+
+    } 
+    
+    else if ( !(pitch > pitch_thres || pitch < -pitch_thres) && (yaw > 7*yaw_thres || yaw < -7*yaw_thres)) {
+        if (key=="i") key = "k";
+        else if (key=="j") key = "l";
+        else if (key=="k") key = "i";
+        else if (key=="l") key = "j";
+    } else if (pitch > pitch_thres  && (yaw > 7*yaw_thres || yaw < -7*yaw_thres)) {
+        if (key=="i") key = "uk";
+        else if (key=="j") key = "l";
+        else if (key=="k") key = "hi";
+        else if (key=="l") key = "j";
+    } else if (pitch < -pitch_thres  && (yaw > 7*yaw_thres || yaw < -7*yaw_thres)) {
+        if (key=="i") key = "hk";
+        else if (key=="j") key = "l";
+        else if (key=="k") key = "ui";
+        else if (key=="l") key = "j";
+    }
+
+    else if ( !(pitch > pitch_thres || pitch < -pitch_thres) && (yaw < -5*yaw_thres && yaw > -7*yaw_thres)) {
+        if (key=="i") key = "jk";
+        else if (key=="j") key = "kl";
+        else if (key=="k") key = "li";
+        else if (key=="l") key = "ij";
+    } else if (pitch > pitch_thres  && (yaw < -5*yaw_thres && yaw > -7*yaw_thres)){
+        if (key=="i") key = "ujk";
+        else if (key=="j") key = "kl";
+        else if (key=="k") key = "hli";
+        else if (key=="l") key = "ij";
+    } else if (pitch < -pitch_thres  && (yaw < -5*yaw_thres && yaw > -7*yaw_thres)){
+        if (key=="i") key = "hjk";
+        else if (key=="j") key = "kl";
+        else if (key=="k") key = "uli";
+        else if (key=="l") key = "ij";
+    }
+
+    else if ( !(pitch > pitch_thres || pitch < -pitch_thres) && (yaw < -3*yaw_thres && yaw > -5*yaw_thres)) {
+        if (key=="i") key = "j";
+        else if (key=="j") key = "k";
+        else if (key=="k") key = "l";
+        else if (key=="l") key = "i";
+    } else if (pitch > pitch_thres  && (yaw < -3*yaw_thres && yaw > -5*yaw_thres)) {
+        if (key=="i") key = "uj";
+        else if (key=="j") key = "k";
+        else if (key=="k") key = "hl";
+        else if (key=="l") key = "i";
+    } else if (pitch < -pitch_thres  && (yaw < -3*yaw_thres && yaw > -5*yaw_thres)) {
+        if (key=="i") key = "hj";
+        else if (key=="j") key = "k";
+        else if (key=="k") key = "ul";
+        else if (key=="l") key = "i";
+    }
+
+    else if ( !(pitch > pitch_thres || pitch < -pitch_thres) && (yaw < -yaw_thres && yaw > -3*yaw_thres)) {
+        if (key=="i") key = "ij";
+        else if (key=="j") key = "jk";
+        else if (key=="k") key = "kl";
+        else if (key=="l") key = "li";
+    } else if (pitch > pitch_thres  && (yaw < -yaw_thres && yaw > -3*yaw_thres)) {
+        if (key=="i") key = "uij";
+        else if (key=="j") key = "jk";
+        else if (key=="k") key = "hkl";
+        else if (key=="l") key = "li";
+    } else if (pitch < -pitch_thres  && (yaw < -yaw_thres && yaw > -3*yaw_thres)) {
+        if (key=="i") key = "hij";
+        else if (key=="j") key = "jk";
+        else if (key=="k") key = "ukl";
+        else if (key=="l") key = "li";
+
+    }
+   
+    return key;
+
+}
+
+
+
+
+ </script>
+    
+ </body>
+
+
+</html>
