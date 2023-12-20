@@ -225,9 +225,13 @@ class Neural3D_NDC_Dataset(Dataset):
         eval_index=0,
         sphere_scale=1.0,
     ):
+        cam00_images = glob.glob(os.path.join(datadir, "cam00", "images", "*.png"))
+        cam00_images = sorted(cam00_images)
+        print(f"cam00_images: {len(cam00_images)} {datadir}")
+        img = Image.open(cam00_images[0])
         self.img_wh = (
-           1912, # int(1352 / downsample),
-           1172, # int(1014 / downsample),
+           img.size[0], # int(1352 / downsample),
+           img.size[1], # int(1014 / downsample),
         )  # According to the neural 3D paper, the default resolution is 1024x768
         self.root_dir = datadir
         self.split = split
