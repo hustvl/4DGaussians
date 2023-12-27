@@ -76,6 +76,18 @@ For training synthetic scenes such as `bouncingballs`, run
 python train.py -s data/dnerf/bouncingballs --port 6017 --expname "dnerf/bouncingballs" --configs arguments/dnerf/bouncingballs.py 
 ``` 
 You can customize your training config through the config files.
+
+# Checkpoint
+Also, you can training your model with checkpoint.
+```python
+python train.py -s data/dnerf/bouncingballs --port 6017 --expname "dnerf/bouncingballs" --configs arguments/dnerf/bouncingballs.py --checkpoint_iterations 200 # change it.
+```
+Then load checkpoint with:
+```python
+python train.py -s data/dnerf/bouncingballs --port 6017 --expname "dnerf/bouncingballs" --configs arguments/dnerf/bouncingballs.py --start_checkpoint "output/dnerf/bouncingballs/chkpnt_coarse_200.pth"
+# finestage: --start_checkpoint "output/dnerf/bouncingballs/chkpnt_fine_200.pth"
+```
+
 ## Rendering
 Run the following script to render the images.  
 
