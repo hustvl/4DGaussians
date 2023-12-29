@@ -464,6 +464,9 @@ def readdynerfInfo(datadir,use_bg_points,eval):
     scene_bbox_max=[2.5, 2.0, 1.0],
     eval_index=0,
         )
+    
+    max_time = len(os.listdir(os.path.join(datadir,"cam01","images")))
+
     train_cam_infos = format_infos(train_dataset,"train")
     val_cam_infos = format_render_poses(test_dataset.val_poses,test_dataset)
     nerf_normalization = getNerfppNorm(train_cam_infos)
@@ -480,7 +483,7 @@ def readdynerfInfo(datadir,use_bg_points,eval):
                            video_cameras=val_cam_infos,
                            nerf_normalization=nerf_normalization,
                            ply_path=ply_path,
-                           maxtime=100
+                           maxtime=max_time
                            )
     return scene_info
 

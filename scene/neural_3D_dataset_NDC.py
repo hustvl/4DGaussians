@@ -225,10 +225,15 @@ class Neural3D_NDC_Dataset(Dataset):
         eval_index=0,
         sphere_scale=1.0,
     ):
-        cam00_images = glob.glob(os.path.join(datadir, "cam00", "images", "*.png"))
-        cam00_images = sorted(cam00_images)
-        print(f"cam00_images: {len(cam00_images)} {datadir}")
-        img = Image.open(cam00_images[0])
+        
+        cam01_images_fold = os.path.join(datadir,"cam01","images")
+        cam01_images = [file for file in os.listdir(cam01_images_fold) if file.endswith(".png") or file.endswith(".jpg") ]
+        self.len_images = len(cam01_images)
+        img = Image.open(os.path.join(cam01_images_fold,cam01_images[0]))
+        # cam00_images = glob.glob(os.path.join(datadir, "cam00", "images", "*.png"))
+        # cam00_images = sorted(cam00_images)
+        # print(f"cam00_images: {len(cam00_images)} {datadir}")
+        # img = Image.open(cam00_images[0])
         self.img_wh = (
            img.size[0], # int(1352 / downsample),
            img.size[1], # int(1014 / downsample),
@@ -311,7 +316,7 @@ class Neural3D_NDC_Dataset(Dataset):
         image_times = []
         N_cams = 0
         N_time = 0
-        countss = 100
+        countss = self.len_images 
         for index, video_path in enumerate(videos):
             
             if index == self.eval_index:
