@@ -23,3 +23,6 @@ mkdir -p $workdir/colmap/dense/workspace
 /home/spaceport/Softwares/colmap/build/src/colmap/exe/colmap image_undistorter --image_path $workdir/colmap/images --input_path $workdir/colmap/sparse/0 --output_path $workdir/colmap/dense/workspace
 /home/spaceport/Softwares/colmap/build/src/colmap/exe/colmap patch_match_stereo --workspace_path $workdir/colmap/dense/workspace
 /home/spaceport/Softwares/colmap/build/src/colmap/exe/colmap stereo_fusion --workspace_path $workdir/colmap/dense/workspace --output_path $workdir/colmap/dense/workspace/fused.ply
+colmap image_undistorter --image_path $workdir/colmap/images --input_path $workdir/colmap/sparse/0 --output_path $workdir/colmap/dense/workspace
+colmap patch_match_stereo --workspace_path $workdir/colmap/dense/workspace
+colmap stereo_fusion --workspace_path $workdir/colmap/dense/workspace --output_path $workdir/colmap/dense/workspace/fused.ply
