@@ -103,21 +103,34 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
         viewpoint_stack = temp_list.copy()
     else:
         load_in_memory = False 
-        
+                            # 
+    count = 0
     for iteration in range(first_iter, final_iter+1):        
         if network_gui.conn == None:
             network_gui.try_connect()
         while network_gui.conn != None:
             try:
                 net_image_bytes = None
-                custom_cam, do_training, pipe.convert_SHs_python, pipe.compute_cov3D_python, keep_alive, scaling_modifer, ts = network_gui.receive()
+                custom_cam, do_training, pipe.convert_SHs_python, pipe.compute_cov3D_python, keep_alive, scaling_modifer = network_gui.receive()
                 if custom_cam != None:
+                    count +=1
+                    viewpoint_index = (count ) % len(video_cams)
+                    if (count //(len(video_cams))) % 2 == 0:
+                        viewpoint_index = viewpoint_index
+                    else:
+                        viewpoint_index = len(video_cams) - viewpoint_index - 1
+                    # print(viewpoint_index)
+                    viewpoint = video_cams[viewpoint_index]
+                    custom_cam.time = viewpoint.time
+                    # print(custom_cam.time, viewpoint_index, count)
                     net_image = render(custom_cam, gaussians, pipe, background, scaling_modifer, stage=stage, cam_type=scene.dataset_type)["render"]
+
                     net_image_bytes = memoryview((torch.clamp(net_image, min=0, max=1.0) * 255).byte().permute(1, 2, 0).contiguous().cpu().numpy())
                 network_gui.send(net_image_bytes, dataset.source_path)
-                if do_training and ((iteration < int(opt.iterations)) or not keep_alive):
+                if do_training and ((iteration < int(opt.iterations)) or not keep_alive) :
                     break
             except Exception as e:
+                print(e)
                 network_gui.conn = None
 
         iter_start.record()
