@@ -358,9 +358,9 @@ def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_i
                     l1_test += l1_loss(image, gt_image).mean().double()
                     # mask=viewpoint.mask
 
-                    lpips_test_a += lpips_loss(image,gt_image,lpips_model, normalize=True).item()
+                    lpips_test_a += lpips_model(gt_image, image, normalize=True).item()
 
-                    lpips_test_v += lpips_loss(image,gt_image,lpips_model2, normalize=True).item()
+                    lpips_test_v += lpips_model2(gt_image, image, normalize=True).item()
                     
                     ssim_test.append(ssim(image,gt_image))
                     
