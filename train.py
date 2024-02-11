@@ -31,6 +31,7 @@ from utils.scene_utils import render_training_image
 from time import time
 import copy
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 to8b = lambda x : (255*np.clip(x.cpu().numpy(),0,1)).astype(np.uint8)
 
 try:
@@ -69,8 +70,8 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
     
     progress_bar = tqdm(range(first_iter, final_iter), desc="Training progress")
     first_iter += 1
-    lpips_model = lpips.LPIPS(net="alex").cuda()
-    lpips_model2 = lpips.LPIPS(net="vgg").cuda()
+    lpips_model = lpips.LPIPS(net="alex", version="0.1").eval().to(device)
+    lpips_model2 = lpips.LPIPS(net="vgg", version="0.1").eval().to(device)
     video_cams = scene.getVideoCameras()
     test_cams = scene.getTestCameras()
     train_cams = scene.getTrainCameras()
@@ -228,7 +229,7 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
 
             # Log and save
             timer.pause()
-            training_report(tb_writer, iteration, Ll1, loss, l1_loss, iter_start.elapsed_time(iter_end), testing_iterations, lpips_model, lpips_model2, scene, render, [pipe, background], stage, scene.dataset_type)
+            training_report(tb_writer, iteration, Ll1, loss, l1_loss, iter_start.elapsed_time(iter_end), testing_iterations, lpips_model, lpips_model2, opt.lambda_lpips, opt.lambda_dssim, scene, render, [pipe, background], stage, scene.dataset_type)
             if (iteration in saving_iterations):
                 print("\n[ITER {}] Saving Gaussians".format(iteration))
                 scene.save(iteration, stage)
@@ -320,7 +321,7 @@ def prepare_output_and_logger(expname):
         print("Tensorboard not available: not logging progress")
     return tb_writer
 
-def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_iterations, lpips_model, lpips_model2, scene : Scene, renderFunc, renderArgs, stage, dataset_type):
+def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_iterations, lpips_model, lpips_model2, opt.lambda_lpips, opt.lambda_dssim, scene : Scene, renderFunc, renderArgs, stage, dataset_type):
     if tb_writer:
         tb_writer.add_scalar(f'{stage}/train_loss_patches/l1_loss', Ll1.item(), iteration)
         tb_writer.add_scalar(f'{stage}/train_loss_patchestotal_loss', loss.item(), iteration)
@@ -359,9 +360,9 @@ def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_i
 
                     lpips_test_a += lpips_loss(image,gt_image,lpips_model, normalize=True).mean().double()
 
-                    lpips_test_v += lpips_loss(image,gt_image,lpips_model2, normalize=True).mean().double()
+                    lpips_test_v += opt.lambda_lpips * lpips_loss(image,gt_image,lpips_model2).mean().double()
                     
-                    ssim_test += ssim(image,gt_image).mean().double()
+                    ssim_test += opt.lambda_dssim * (1.0- ssim(image,gt_image).mean().double())
                     
                     psnr_test += psnr(image, gt_image, mask=None).mean().double()
 
