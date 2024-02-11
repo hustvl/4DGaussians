@@ -339,7 +339,8 @@ def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_i
             if config['cameras'] and len(config['cameras']) > 0:
                 l1_test = 0.0
                 psnr_test = 0.0
-                ssim_test = []
+                ssim_test = 0.0
+                n = 0
                 lpips_test_a = 0.0
                 lpips_test_v = 0.0
                 for idx, viewpoint in enumerate(config['cameras']):
@@ -362,13 +363,14 @@ def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_i
 
                     lpips_test_v += lpips_model2(gt_image, image, normalize=True).item()
                     
-                    ssim_test.append(ssim(image,gt_image))
+                    ssim_test += ssim(image,gt_image)
+                    n += 1
                     
                     psnr_test += psnr(image, gt_image, mask=None).mean().double()
 
                 psnr_test /= len(config['cameras'])
                 l1_test /= len(config['cameras'])          
-                print("\n[ITER {}] Evaluating {}: L1 {} PSNR {} SSIM {} LPIPSA {} LPIPSV {}".format(iteration, config['name'], l1_test, psnr_test, np.array(ssim_test).mean(), lpips_test_a, lpips_test_v))
+                print("\n[ITER {}] Evaluating {}: L1 {} PSNR {} SSIM {} LPIPSA {} LPIPSV {}".format(iteration, config['name'], l1_test, psnr_test, ssim_test/n , lpips_test_a, lpips_test_v))
                 # print("sh feature",scene.gaussians.get_features.shape)
                 if tb_writer:
                     tb_writer.add_scalar(stage + "/"+config['name'] + '/loss_viewpoint - l1_loss', l1_test, iteration)
