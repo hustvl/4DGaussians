@@ -370,7 +370,7 @@ def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_i
 
                 psnr_test /= len(config['cameras'])
                 l1_test /= len(config['cameras'])          
-                print("\n[ITER {}] Evaluating {}: L1 {} PSNR {} SSIM {} LPIPSA {} LPIPSV {}".format(iteration, config['name'], l1_test, psnr_test, ssim_test/n , lpips_test_a, lpips_test_v))
+                print("\n[ITER {}] Evaluating {}: L1 {} PSNR {} SSIM {} LPIPSA {} LPIPSV {}".format(iteration, config['name'], l1_test, psnr_test, ssim_test/n, lpips_test_a/n, lpips_test_v/n))
                 # print("sh feature",scene.gaussians.get_features.shape)
                 if tb_writer:
                     tb_writer.add_scalar(stage + "/"+config['name'] + '/loss_viewpoint - l1_loss', l1_test, iteration)
