@@ -70,6 +70,7 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
     progress_bar = tqdm(range(first_iter, final_iter), desc="Training progress")
     first_iter += 1
     lpips_model = lpips.LPIPS(net="alex").cuda()
+    lpips_model2 = lpips.LPIPS(net="vgg").cuda()
     video_cams = scene.getVideoCameras()
     test_cams = scene.getTestCameras()
     train_cams = scene.getTrainCameras()
@@ -227,7 +228,7 @@ def scene_reconstruction(dataset, opt, hyper, pipe, testing_iterations, saving_i
 
             # Log and save
             timer.pause()
-            training_report(tb_writer, iteration, Ll1, loss, l1_loss, iter_start.elapsed_time(iter_end), testing_iterations, lpips_model, scene, render, [pipe, background], stage, scene.dataset_type)
+            training_report(tb_writer, iteration, Ll1, loss, l1_loss, iter_start.elapsed_time(iter_end), testing_iterations, lpips_model, lpips_model2, scene, render, [pipe, background], stage, scene.dataset_type)
             if (iteration in saving_iterations):
                 print("\n[ITER {}] Saving Gaussians".format(iteration))
                 scene.save(iteration, stage)
@@ -319,7 +320,7 @@ def prepare_output_and_logger(expname):
         print("Tensorboard not available: not logging progress")
     return tb_writer
 
-def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_iterations, lpips_model, scene : Scene, renderFunc, renderArgs, stage, dataset_type):
+def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_iterations, lpips_model, lpips_model2, scene : Scene, renderFunc, renderArgs, stage, dataset_type):
     if tb_writer:
         tb_writer.add_scalar(f'{stage}/train_loss_patches/l1_loss', Ll1.item(), iteration)
         tb_writer.add_scalar(f'{stage}/train_loss_patchestotal_loss', loss.item(), iteration)
@@ -338,7 +339,8 @@ def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_i
                 l1_test = 0.0
                 psnr_test = 0.0
                 ssim_test = 0.0
-                lpips_test = 0.0
+                lpips_test_a = 0.0
+                lpips_test_v = 0.0
                 for idx, viewpoint in enumerate(config['cameras']):
                     image = torch.clamp(renderFunc(viewpoint, scene.gaussians,stage=stage, cam_type=dataset_type, *renderArgs)["render"], 0.0, 1.0)
                     if dataset_type == "PanopticSports":
@@ -355,7 +357,9 @@ def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_i
                     l1_test += l1_loss(image, gt_image).mean().double()
                     # mask=viewpoint.mask
 
-                    lpips_test += lpips_loss(image,gt_image,lpips_model)
+                    lpips_test_a += lpips_loss(image,gt_image,lpips_model)
+
+                    lpips_test_v += lpips_loss(image,gt_image,lpips_model2)
                     
                     ssim_test += ssim(image,gt_image)
                     
@@ -363,11 +367,14 @@ def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_i
 
                 psnr_test /= len(config['cameras'])
                 l1_test /= len(config['cameras'])          
-                print("\n[ITER {}] Evaluating {}: L1 {} PSNR {} SSIM {} LPIPS {}".format(iteration, config['name'], l1_test, psnr_test, ssim_test, lpips_test))
+                print("\n[ITER {}] Evaluating {}: L1 {} PSNR {} SSIM {} LPIPSA {} LPIPSV {}".format(iteration, config['name'], l1_test, psnr_test, ssim_test, lpips_test_a, lpips_test_v))
                 # print("sh feature",scene.gaussians.get_features.shape)
                 if tb_writer:
                     tb_writer.add_scalar(stage + "/"+config['name'] + '/loss_viewpoint - l1_loss', l1_test, iteration)
                     tb_writer.add_scalar(stage+"/"+config['name'] + '/loss_viewpoint - psnr', psnr_test, iteration)
+                    tb_writer.add_scalar(stage+"/"+config['name'] + '/loss_viewpoint - ssim', ssim_test, iteration)
+                    tb_writer.add_scalar(stage + "/"+config['name'] + '/loss_viewpoint - lpipsa', lpips_test_a, iteration)
+                    tb_writer.add_scalar(stage+"/"+config['name'] + '/loss_viewpoint - lpipsv', lpips_test_v, iteration)
 
         if tb_writer:
             tb_writer.add_histogram(f"{stage}/scene/opacity_histogram", scene.gaussians.get_opacity, iteration)
