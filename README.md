@@ -4,37 +4,25 @@
 
 ### [Project Page](https://guanjunwu.github.io/4dgs/index.html)| [arXiv Paper](https://arxiv.org/abs/2310.08528)
 
-[Guanjun Wu](https://guanjunwu.github.io/) `<sup>`1*`</sup>`, [Taoran Yi](https://github.com/taoranyi) `<sup>`2*`</sup>`,
-[Jiemin Fang](https://jaminfong.cn/) `<sup>`3‡`</sup>`, [Lingxi Xie](http://lingxixie.com/) `<sup>`3 `</sup>`, `</br>`[Xiaopeng Zhang](https://scholar.google.com/citations?user=Ud6aBAcAAAAJ&hl=zh-CN) `<sup>`3 `</sup>`, [Wei Wei](https://www.eric-weiwei.com/) `<sup>`1 `</sup>`,[Wenyu Liu](http://eic.hust.edu.cn/professor/liuwenyu/) `<sup>`2 `</sup>`, [Qi Tian](https://www.qitian1987.com/) `<sup>`3 `</sup>` , [Xinggang Wang](https://xwcv.github.io) `<sup>`2‡✉`</sup>`
+[Guanjun Wu](https://guanjunwu.github.io/) <sup>1*</sup>, [Taoran Yi](https://github.com/taoranyi) <sup>2*</sup>,
+[Jiemin Fang](https://jaminfong.cn/) <sup>3‡</sup>, [Lingxi Xie](http://lingxixie.com/) <sup>3 </sup>, </br>[Xiaopeng Zhang](https://scholar.google.com/citations?user=Ud6aBAcAAAAJ&hl=zh-CN) <sup>3 </sup>, [Wei Wei](https://www.eric-weiwei.com/) <sup>1 </sup>,[Wenyu Liu](http://eic.hust.edu.cn/professor/liuwenyu/) <sup>2 </sup>, [Qi Tian](https://www.qitian1987.com/) <sup>3 </sup> , [Xinggang Wang](https://xwcv.github.io) <sup>2‡✉</sup>
 
-`<sup>`1 `</sup>`School of CS, HUST &emsp; `<sup>`2 `</sup>`School of EIC, HUST &emsp; `<sup>`3 `</sup>`Huawei Inc. &emsp;
+<sup>1 </sup>School of CS, HUST &emsp; <sup>2 </sup>School of EIC, HUST &emsp; <sup>3 </sup>Huawei Inc. &emsp;
 
-`<sup>`\*`</sup>` Equal Contributions. `<sup>`$\ddagger$`</sup>` Project Lead. `<sup>`✉`</sup>` Corresponding Author.
+<sup>\*</sup> Equal Contributions. <sup>$\ddagger$</sup> Project Lead. <sup>✉</sup> Corresponding Author.
 
 ---
 
 ![block](assets/teaserfig.jpg)
 Our method converges very quickly and achieves real-time rendering speed.
 
-Colab demo:[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hustvl/4DGaussians/blob/master/4DGaussians.ipynb) (Thanks [camenduru](https://github.com/camenduru/4DGaussians-colab).)
+New Colab demo:[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1wz0D5Y9egAlcxXy8YO9UmpQ9oH51R7OW?usp=sharing) (Thanks [Tasmay-Tibrewal
+](https://github.com/Tasmay-Tibrewal))
+
+Old Colab demo:[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hustvl/4DGaussians/blob/master/4DGaussians.ipynb) (Thanks [camenduru](https://github.com/camenduru/4DGaussians-colab).)
 
 Light Gaussian implementation: [This link](https://github.com/pablodawson/4DGaussians) (Thanks [pablodawson](https://github.com/pablodawson))
 
-## Further works
-
-We sincerely thank the authors and their fantastic works for other applications based on our code.
-
-[MD-Splatting: Learning Metric Deformation from 4D Gaussians in Highly Deformable Scenes](https://md-splatting.github.io/)
-
-[4DGen: Grounded 4D Content Generation with Spatial-temporal Consistency](https://vita-group.github.io/4DGen/)
-
-[DreamGaussian4D: Generative 4D Gaussian Splatting](https://github.com/jiawei-ren/dreamgaussian4d)
-
-[EndoGaussian: Real-time Gaussian Splatting for Dynamic Endoscopic Scene Reconstruction](https://github.com/yifliu3/EndoGaussian)
-
-[EndoGS: Deformable Endoscopic Tissues Reconstruction with Gaussian Splatting](https://github.com/HKU-MedAI/EndoGS)
-
-[Endo-4DGS: Endoscopic Monocular Scene Reconstruction with 4D Gaussian Splatting](https://arxiv.org/abs/2401.16416)
 
 ## News
 
@@ -192,6 +180,23 @@ python scripts/downsample_point.py data/dynerf/sear_steak/colmap/dense/workspace
 In my paper, I always use `colmap.sh` to generate dense point clouds and downsample it to less than 40000 points.
 
 Here are some codes maybe useful but never adopted in my paper, you can also try it.
+
+## Further works
+
+We sincerely thank the authors and their fantastic works for other applications based on our code.
+
+[MD-Splatting: Learning Metric Deformation from 4D Gaussians in Highly Deformable Scenes](https://md-splatting.github.io/)
+
+[4DGen: Grounded 4D Content Generation with Spatial-temporal Consistency](https://vita-group.github.io/4DGen/)
+
+[DreamGaussian4D: Generative 4D Gaussian Splatting](https://github.com/jiawei-ren/dreamgaussian4d)
+
+[EndoGaussian: Real-time Gaussian Splatting for Dynamic Endoscopic Scene Reconstruction](https://github.com/yifliu3/EndoGaussian)
+
+[EndoGS: Deformable Endoscopic Tissues Reconstruction with Gaussian Splatting](https://github.com/HKU-MedAI/EndoGS)
+
+[Endo-4DGS: Endoscopic Monocular Scene Reconstruction with 4D Gaussian Splatting](https://arxiv.org/abs/2401.16416)
+
 
 ---
 
