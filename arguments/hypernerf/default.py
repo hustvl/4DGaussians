@@ -11,7 +11,7 @@ ModelHiddenParams = dict(
     plane_tv_weight = 0.0002,
     time_smoothness_weight = 0.001,
     l1_time_planes =  0.0001,
-    render_process=True
+    render_process=False
 )
 OptimizationParams = dict(
     # dataloader=True,

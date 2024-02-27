@@ -11,7 +11,7 @@ OptimizationParams = dict(
     iterations = 20000,
     pruning_interval = 8000,
     percent_dense = 0.01,
-    render_process=True,
+    render_process=False,
     # no_do=False,
     # no_dshs=False
     
