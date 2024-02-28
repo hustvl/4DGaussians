@@ -25,8 +25,8 @@ Light Gaussian implementation: [This link](https://github.com/pablodawson/4DGaus
 
 
 ## News
-
-2024.02: Accepted by CVPR 2024. We delete some logging settings for debugging, the corrected training time is only **8 mins** (20 mins before) in D-NeRF datasets and **30 mins** (1 hour before) in HyperNeRF datasets. The rendering quality is not affected.
+2024.02.28: Update SIBR viewer guidance.
+2024.02.27: Accepted by CVPR 2024. We delete some logging settings for debugging, the corrected training time is only **8 mins** (20 mins before) in D-NeRF datasets and **30 mins** (1 hour before) in HyperNeRF datasets. The rendering quality is not affected.
 
 ## Environmental Setups
 
@@ -133,7 +133,8 @@ cp -r data/your-ns-data/images data/your-ns-data/colmap/images
 python train.py -s data/your-ns-data/colmap --port 6017 --expname "custom" --configs arguments/hypernerf/default.py 
 
 ```
-
+## Viewer
+[Watch me](./docs/viewer_usage.md)
 ## Scripts
 
 There are some helpful scripts in , please feel free to use them.
