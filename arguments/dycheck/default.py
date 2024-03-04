@@ -5,29 +5,25 @@ ModelHiddenParams = dict(
      'output_coordinate_dim': 16,
      'resolution': [64, 64, 64, 150]
     },
-    multires = [1,2],
-    defor_depth = 0,
+    multires = [1,2,4],
+    defor_depth = 1,
     net_width = 128,
     plane_tv_weight = 0.0002,
     time_smoothness_weight = 0.001,
     l1_time_planes =  0.0001,
-    no_do=False,
-    no_dshs=False,
-    no_ds=False,
-    empty_voxel=False,
-    render_process=False,
-    static_mlp=False
-
+    render_process=True
 )
 OptimizationParams = dict(
-    dataloader=True,
-    iterations = 14000,
-    batch_size=4,
+    # dataloader=True,
+    iterations = 60_000,
+    batch_size=2,
     coarse_iterations = 3000,
     densify_until_iter = 10_000,
-    opacity_reset_interval = 60000,
-    opacity_threshold_coarse = 0.005,
-    opacity_threshold_fine_init = 0.005,
-    opacity_threshold_fine_after = 0.005,
+    opacity_reset_interval = 300000,
+    # grid_lr_init = 0.0016,
+    # grid_lr_final = 16,
+    # opacity_threshold_coarse = 0.005,
+    # opacity_threshold_fine_init = 0.005,
+    # opacity_threshold_fine_after = 0.005,
     # pruning_interval = 2000
 )

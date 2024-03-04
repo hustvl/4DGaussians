@@ -1,10 +1,8 @@
 import json
 import os
-# exp_name = ["dnerf_tv_nodx","dnerf_tv_nodr","dnerf_tv_nods","dnerf_tv","dnerf_tv_dshs","dnerf_tv_do",
-            # "dnerf_tv_2","dnerf_tv_8","dnerf_tv_deepmlp"]
-# exp_name= ["dnerf_tv_2_slim"]
-exp_name=["dynerf_default","dynerf_9"]
-# exp_name = ["hypernerf_3dgs"]
+# exp_name = ["hypernerf"]
+# exp_name= ["dnerf"]
+exp_name=["dynerf"]
 scene_name = ["coffee_martini", "cook_spinach", "cut_roasted_beef", "flame_salmon_1", "flame_steak", "sear_steak"]
 # scene_name = ["bouncingballs","jumpingjacks","lego","standup","hook","mutant","hellwarrior","trex"]
 # scene_name = ["3dprinter","broom2","peel-banana","vrig-chicken"]
@@ -18,8 +16,6 @@ for scene in scene_name:
         load_path = os.path.join("output",experiment,scene,json_name)
         with open(load_path) as f:
             js = json.load(f)
-        # print(js)
-        # print(scene, experiment, js["ours_20000"])
         for res in ["ours_30000","ours_20000","ours_14000","ours_10000","ours_7000","ours_3000"]:
             if res in js.keys():
                 for key, item in js[res].items():
