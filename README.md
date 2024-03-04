@@ -25,7 +25,11 @@ Light Gaussian implementation: [This link](https://github.com/pablodawson/4DGaus
 
 
 ## News
+
+2024.03.04: We change the hyperparameters of the Neu3D dataset, corresponding to our paper
+
 2024.02.28: Update SIBR viewer guidance.
+
 2024.02.27: Accepted by CVPR 2024. We delete some logging settings for debugging, the corrected training time is only **8 mins** (20 mins before) in D-NeRF datasets and **30 mins** (1 hour before) in HyperNeRF datasets. The rendering quality is not affected.
 
 ## Environmental Setups
