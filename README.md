@@ -25,6 +25,7 @@ Light Gaussian implementation: [This link](https://github.com/pablodawson/4DGaus
 
 
 ## News
+2024.3.25: Update guidance for hypernerf and dynerf dataset.
 
 2024.03.04: We change the hyperparameters of the Neu3D dataset, corresponding to our paper
 
@@ -104,10 +105,28 @@ python scripts/downsample_point.py data/dynerf/cut_roasted_beef/colmap/dense/wor
 # Finally, train.
 python train.py -s data/dynerf/cut_roasted_beef --port 6017 --expname "dynerf/cut_roasted_beef" --configs arguments/dynerf/cut_roasted_beef.py 
 ```
+For training hypernerf scenes such as `virg/broom`, run
+```python
+# First, computing dense point clouds by COLMAP
+bash colmap.sh data/hypernerf/virg/broom2 hypernerf
+# Second, downsample the point clouds generated in the first step.
+python scripts/downsample_point.py data/hypernerf/virg/broom2/colmap/dense/workspace/fused.ply data/hypernerf/virg/broom2/points3D_downsample2.ply
+# Finally, train.
+python train.py -s  data/hypernerf/virg/broom2/ --port 6017 --expname "hypernerf/broom2" --configs arguments/hypernerf/broom2.py 
+```
 
+For your custom datasets, install nerfstudio and follow their colmap pipeline.
+
+```python
+pip install nerfstudio
+# computing camera poses by colmap pipeline
+ns-process-data images --data data/your-data --output-dir data/your-ns-data
+cp -r data/your-ns-data/images data/your-ns-data/colmap/images
+python train.py -s data/your-ns-data/colmap --port 6017 --expname "custom" --configs arguments/hypernerf/default.py 
+```
 You can customize your training config through the config files.
 
-Checkpoint
+## Checkpoint
 
 Also, you can training your model with checkpoint.
 
@@ -138,17 +157,7 @@ You can just run the following script to evaluate the model.
 python metrics.py --model_path "output/dnerf/bouncingballs/" 
 ```
 
-## Custom Datasets
 
-Install nerfstudio and follow their colmap pipeline.
-
-```
-pip install nerfstudio
-ns-process-data images --data data/your-data --output-dir data/your-ns-data
-cp -r data/your-ns-data/images data/your-ns-data/colmap/images
-python train.py -s data/your-ns-data/colmap --port 6017 --expname "custom" --configs arguments/hypernerf/default.py 
-
-```
 ## Viewer
 [Watch me](./docs/viewer_usage.md)
 ## Scripts
