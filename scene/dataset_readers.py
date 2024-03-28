@@ -382,7 +382,7 @@ def readHyperDataInfos(datadir,use_bg_points,eval):
     video_cam_infos.split="video"
 
 
-    ply_path = os.path.join(datadir, "points3D_downsample.ply")
+    ply_path = os.path.join(datadir, "points3D_downsample2.ply")
     pcd = fetchPly(ply_path)
     xyz = np.array(pcd.points)
 
