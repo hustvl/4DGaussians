@@ -162,17 +162,18 @@ python metrics.py --model_path "output/dnerf/bouncingballs/"
 [Watch me](./docs/viewer_usage.md)
 ## Scripts
 
-There are some helpful scripts in , please feel free to use them.
+There are some helpful scripts, please feel free to use them.
 
-`vis_point.py`:
-get all points clouds at each timestamps.
+`export_perframe_3DGS.py`:
+get all 3D Gaussians point clouds at each timestamps.
 
 usage:
 
 ```python
-export exp_name="hypernerf"
-python vis_point.py --model_path output/$exp_name/interp/aleks-teapot --configs arguments/$exp_name/default.py 
+python export_perframe_3DGS.py --iteration 14000 --configs arguments/dnerf/lego.py --model_path output/dnerf/lego 
 ```
+
+You will a set of 3D Gaussians are saved in `output/dnerf/lego/gaussian_pertimestamp`.
 
 `weight_visualization.ipynb`:
 
