@@ -570,6 +570,7 @@ def readPanopticmeta(datadir, json_path):
     scene_radius = 1.1 * np.max(np.linalg.norm(cam_centers - np.mean(cam_centers, 0)[None], axis=-1))
     # breakpoint()
     return cam_infos, max_time, scene_radius 
+
 def readPanopticSportsinfos(datadir):
     train_cam_infos, max_time, scene_radius = readPanopticmeta(datadir, "train_meta.json")
     test_cam_infos,_, _ = readPanopticmeta(datadir, "test_meta.json")
@@ -599,11 +600,51 @@ def readPanopticSportsinfos(datadir):
                            maxtime=max_time,
                            )
     return scene_info
+
+def readMultipleViewinfos(datadir,llffhold=8):
+
+    cameras_extrinsic_file = os.path.join(datadir, "sparse_/images.bin")
+    cameras_intrinsic_file = os.path.join(datadir, "sparse_/cameras.bin")
+    cam_extrinsics = read_extrinsics_binary(cameras_extrinsic_file)
+    cam_intrinsics = read_intrinsics_binary(cameras_intrinsic_file)
+    from scene.multipleview_dataset import multipleview_dataset
+    train_cam_infos = multipleview_dataset(cam_extrinsics=cam_extrinsics, cam_intrinsics=cam_intrinsics, cam_folder=datadir,split="train")
+    test_cam_infos = multipleview_dataset(cam_extrinsics=cam_extrinsics, cam_intrinsics=cam_intrinsics, cam_folder=datadir,split="test")
+
+    train_cam_infos_ = format_infos(train_cam_infos,"train")
+    nerf_normalization = getNerfppNorm(train_cam_infos_)
+
+    ply_path = os.path.join(datadir, "points3D_multipleview.ply")
+    bin_path = os.path.join(datadir, "points3D_multipleview.bin")
+    txt_path = os.path.join(datadir, "points3D_multipleview.txt")
+    if not os.path.exists(ply_path):
+        print("Converting point3d.bin to .ply, will happen only the first time you open the scene.")
+        try:
+            xyz, rgb, _ = read_points3D_binary(bin_path)
+        except:
+            xyz, rgb, _ = read_points3D_text(txt_path)
+        storePly(ply_path, xyz, rgb)
+    
+    try:
+        pcd = fetchPly(ply_path)
+        
+    except:
+        pcd = None
+    
+    scene_info = SceneInfo(point_cloud=pcd,
+                           train_cameras=train_cam_infos,
+                           test_cameras=test_cam_infos,
+                           video_cameras=test_cam_infos.video_cam_infos,
+                           maxtime=0,
+                           nerf_normalization=nerf_normalization,
+                           ply_path=ply_path)
+    return scene_info
+
 sceneLoadTypeCallbacks = {
     "Colmap": readColmapSceneInfo,
     "Blender" : readNerfSyntheticInfo,
     "dynerf" : readdynerfInfo,
     "nerfies": readHyperDataInfos,  # NeRFies & HyperNeRF dataset proposed by [https://github.com/google/hypernerf/releases/tag/v0.1]
-    "PanopticSports" : readPanopticSportsinfos
-
+    "PanopticSports" : readPanopticSportsinfos,
+    "MultipleView": readMultipleViewinfos
 }
