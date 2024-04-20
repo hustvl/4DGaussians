@@ -167,6 +167,7 @@ For training multipleviews scenes,you are supposed to build a configuration file
 python train.py -s  data/multipleview/(your dataset name) --port 6017 --expname "multipleview/(your dataset name)" --configs arguments/multipleview/(you dataset name).py 
 ```
 
+
 For your custom datasets, install nerfstudio and follow their [COLMAP](https://colmap.github.io/) pipeline. You should install COLMAP at first, then:
 
 ```python
