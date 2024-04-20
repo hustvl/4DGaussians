@@ -88,6 +88,50 @@ Meanwhile, [Plenoptic Dataset](https://github.com/facebookresearch/Neural_3D_Vid
 |     ├── ...
 ```
 
+**For multipleviews scenes:**
+If you want to train your own dataset of multipleviews scenes,you can orginize your dataset as follows:
+
+```
+├── data
+|   | multipleview
+│     | (your dataset name) 
+│   	  | cam01
+|     		  ├── frame_00001.jpg
+│     		  ├── frame_00002.jpg
+│     		  ├── ...
+│   	  | cam02
+│     		  ├── frame_00001.jpg
+│     		  ├── frame_00002.jpg
+│     		  ├── ...
+│   	  | ...
+```
+After that,you can use the  `multipleviewprogress.sh` we provided to generate related data of poses and pointcloud.You can use it as follows:
+```bash
+bash multipleviewprogress.sh (youe dataset name)
+```
+You need to ensure that the data folder is orginized as follows after running multipleviewprogress.sh:
+```
+├── data
+|   | multipleview
+│     | (your dataset name) 
+│   	  | cam01
+|     		  ├── frame_00001.jpg
+│     		  ├── frame_00002.jpg
+│     		  ├── ...
+│   	  | cam02
+│     		  ├── frame_00001.jpg
+│     		  ├── frame_00002.jpg
+│     		  ├── ...
+│   	  | ...
+│   	  | sparse_
+│     		  ├── cameras.bin
+│     		  ├── images.bin
+│     		  ├── ...
+│   	  | points3D_multipleview.ply
+│   	  | poses_bounds_multipleview.npy
+```
+
+
 ## Training
 
 For training synthetic scenes such as `bouncingballs`, run
@@ -116,6 +160,11 @@ bash colmap.sh data/hypernerf/virg/broom2 hypernerf
 python scripts/downsample_point.py data/hypernerf/virg/broom2/colmap/dense/workspace/fused.ply data/hypernerf/virg/broom2/points3D_downsample2.ply
 # Finally, train.
 python train.py -s  data/hypernerf/virg/broom2/ --port 6017 --expname "hypernerf/broom2" --configs arguments/hypernerf/broom2.py 
+```
+
+For training multipleviews scenes,you are supposed to build a configuration file named (you dataset name).py under "./arguments/mutipleview",after that,run
+```python
+python train.py -s  data/multipleview/(your dataset name) --port 6017 --expname "multipleview/(your dataset name)" --configs arguments/multipleview/(you dataset name).py 
 ```
 
 
