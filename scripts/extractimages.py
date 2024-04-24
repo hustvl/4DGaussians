@@ -10,7 +10,7 @@ os.makedirs(images_path, exist_ok=True)
 i=0
 
 dir1=os.path.join("data",folder_path)
-for folder_name in os.listdir(dir1):
+for folder_name in sorted(os.listdir(dir1)):
     dir2=os.path.join(dir1,folder_name)
     for file_name in os.listdir(dir2):
         if file_name.startswith("frame_00001"):
