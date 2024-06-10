@@ -92,7 +92,7 @@ if not os.path.exists(colmap_dir):
 poses_arr = np.load(os.path.join(root_dir, "poses_bounds.npy"))
 poses = poses_arr[:, :-2].reshape([-1, 3, 5])  # (N_cams, 3, 5)
 near_fars = poses_arr[:, -2:]
-videos = glob.glob(os.path.join(root_dir, "cam*"))
+videos = glob.glob(os.path.join(root_dir, "cam[0-9][0-9]"))
 videos = sorted(videos)
 print(len(videos), poses_arr.shape)
 assert len(videos) == poses_arr.shape[0]
@@ -111,7 +111,7 @@ poses = np.concatenate([poses[..., 1:2], -poses[..., :1], poses[..., 2:4]], -1)
 # poses[..., 3] /= scale_factor
 # Sample N_views poses for validation - NeRF-like camera trajectory.
 # val_poses = directions
-videos = glob.glob(os.path.join(root_dir, "cam*"))
+videos = glob.glob(os.path.join(root_dir, "cam[0-9][0-9]"))
 videos = sorted(videos)
 image_paths = []
 for index, video_path in enumerate(videos):

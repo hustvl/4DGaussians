@@ -9,3 +9,4 @@ plyfile
 pytorch_msssim
 open3d
 rangehttpserver
+imageio[ffmpeg]

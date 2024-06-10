@@ -19,7 +19,7 @@ def get_state_at_time(pc,viewpoint_camera):
     means3D_final, scales_final, rotations_final, opacity_final, shs_final = pc._deformation(means3D, scales, 
                                                                  rotations, opacity, shs,
                                                                  time)
-    scales_final = pc.scaling_activation(scales_final)
-    rotations_final = pc.rotation_activation(rotations_final)
-    opacity = pc.opacity_activation(opacity_final)
-    return means3D_final, scales_final, rotations_final, opacity, shs
+    # scales_final = pc.scaling_activation(scales_final)
+    # rotations_final = pc.rotation_activation(rotations_final)
+    # opacity = pc.opacity_activation(opacity_final)
+    return means3D_final, scales_final, rotations_final, opacity, shs_final

@@ -7,5 +7,6 @@ diff_rasterization/dist
 tensorboard_3d
 screenshots
 data/
-data
 video_player/media/**
+submodules/
+

@@ -103,8 +103,9 @@ class Load_hyper_data(Dataset):
             self.image_mask = [f'{datadir}/covisible/{int(2)}x/val/{i}.png' for i in self.all_img_origin]
         else:
             self.image_mask = None
-        self.generate_video_path()
-
+        
+        # self.generate_video_path()
+        # self.i_test
     def generate_video_path(self):
         
         self.select_video_cams = [item for i, item in enumerate(self.all_cam_params) if i % 1 == 0 ]
@@ -120,14 +121,14 @@ class Load_hyper_data(Dataset):
         elif self.split == "test":
             return self.load_raw(self.i_test[index])
         elif self.split == "video":
-            return self.load_video(index)
+            return self.load_raw(index)
     def __len__(self):
         if self.split == "train":
             return len(self.i_train)
         elif self.split == "test":
             return len(self.i_test)
         elif self.split == "video":
-            return len(self.video_path)
+            return len(self.i_test)
             # return len(self.video_v2)
     def load_video(self, idx):
         if idx in self.map.keys():
