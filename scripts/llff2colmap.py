@@ -98,17 +98,6 @@ H, W, focal = poses[0, :, -1]
 focal = focal/2
 focal = [focal, focal]
 poses = np.concatenate([poses[..., 1:2], -poses[..., :1], poses[..., 2:4]], -1)
-# poses, _ = center_poses(
-#     poses, blender2opencv
-# )  # Re-center poses so that the average is near the center.
-# near_original = near_fars.min()
-# scale_factor = near_original * 0.75
-# near_fars /= (
-#     scale_factor  # rescale nearest plane so that it is at z = 4/3.
-# )
-# poses[..., 3] /= scale_factor
-# Sample N_views poses for validation - NeRF-like camera trajectory.
-# val_poses = directions
 videos = glob.glob(os.path.join(root_dir, "cam[0-9][0-9]"))
 videos = sorted(videos)
 image_paths = []
@@ -132,8 +121,6 @@ for index, image in enumerate(image_paths):
     shutil.copy(image,goal_path)
 
 print(poses)
-# breakpoint()
-
 # write image information.
 object_images_file = open(os.path.join(colmap_dir,"images.txt"),"w")
 for idx, pose in enumerate(poses):
@@ -147,15 +134,12 @@ for idx, pose in enumerate(poses):
     R = np.linalg.inv(R)
     T = -np.matmul(R,T)
     T = [str(i) for i in T]
-    # T = ["%.3f"%i for i in pose[:3,3]]
     qevc = [str(i) for i in rotmat2qvec(R)]
-    # breakpoint()
     print(idx+1," ".join(qevc)," ".join(T),1,image_name_list[idx],"\n",file=object_images_file)
-# breakpoint()
 
 # write camera infomation.
 object_cameras_file = open(os.path.join(colmap_dir,"cameras.txt"),"w")
-print(1,"SIMPLE_PINHOLE",1352,1014,focal[0],1352/2,1014/2,file=object_cameras_file)
+print(1,"SIMPLE_PINHOLE",1352,1014,focal[0],1352/2,1014/2,file=object_cameras_file) # 
 object_point_file = open(os.path.join(colmap_dir,"points3D.txt"),"w")
 
 object_cameras_file.close()

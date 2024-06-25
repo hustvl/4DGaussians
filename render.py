@@ -23,7 +23,6 @@ from argparse import ArgumentParser
 from arguments import ModelParams, PipelineParams, get_combined_args, ModelHiddenParams
 from gaussian_renderer import GaussianModel
 from time import time
-# import torch.multiprocessing as mp
 import threading
 import concurrent.futures
 def multithread_write(image_list, path):
@@ -53,32 +52,24 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
     render_images = []
     gt_list = []
     render_list = []
-    # breakpoint()
     print("point nums:",gaussians._xyz.shape[0])
     for idx, view in enumerate(tqdm(views, desc="Rendering progress")):
         if idx == 0:time1 = time()
-        # breakpoint()
         
         rendering = render(view, gaussians, pipeline, background,cam_type=cam_type)["render"]
-        # torchvision.utils.save_image(rendering, os.path.join(render_path, '{0:05d}'.format(idx) + ".png"))
         render_images.append(to8b(rendering).transpose(1,2,0))
-        # print(to8b(rendering).shape)
         render_list.append(rendering)
         if name in ["train", "test"]:
             if cam_type != "PanopticSports":
                 gt = view.original_image[0:3, :, :]
             else:
                 gt  = view['image'].cuda()
-            # torchvision.utils.save_image(gt, os.path.join(gts_path, '{0:05d}'.format(idx) + ".png"))
             gt_list.append(gt)
-        # if idx >= 10:
-            # break
+
     time2=time()
     print("FPS:",(len(views)-1)/(time2-time1))
-    # print("writing training images.")
 
     multithread_write(gt_list, gts_path)
-    # print("writing rendering images.")
 
     multithread_write(render_list, render_path)
 

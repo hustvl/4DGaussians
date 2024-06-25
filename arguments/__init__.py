@@ -73,35 +73,35 @@ class PipelineParams(ParamGroup):
         super().__init__(parser, "Pipeline Parameters")
 class ModelHiddenParams(ParamGroup):
     def __init__(self, parser):
-        self.net_width = 64
-        self.timebase_pe = 4
-        self.defor_depth = 1
-        self.posebase_pe = 10
-        self.scale_rotation_pe = 2
-        self.opacity_pe = 2
-        self.timenet_width = 64
-        self.timenet_output = 32
-        self.bounds = 1.6
-        self.plane_tv_weight = 0.0001
-        self.time_smoothness_weight = 0.01
-        self.l1_time_planes = 0.0001
+        self.net_width = 64 # width of deformation MLP, larger will increase the rendering quality and decrase the training/rendering speed.
+        self.timebase_pe = 4 # useless
+        self.defor_depth = 1 # depth of deformation MLP, larger will increase the rendering quality and decrase the training/rendering speed.
+        self.posebase_pe = 10 # useless
+        self.scale_rotation_pe = 2 # useless
+        self.opacity_pe = 2 # useless
+        self.timenet_width = 64 # useless
+        self.timenet_output = 32 # useless
+        self.bounds = 1.6 
+        self.plane_tv_weight = 0.0001 # TV loss of spatial grid
+        self.time_smoothness_weight = 0.01 # TV loss of temporal grid
+        self.l1_time_planes = 0.0001  # TV loss of temporal grid
         self.kplanes_config = {
                              'grid_dimensions': 2,
                              'input_coordinate_dim': 4,
                              'output_coordinate_dim': 32,
-                             'resolution': [64, 64, 64, 25]
+                             'resolution': [64, 64, 64, 25]  # [64,64,64]: resolution of spatial grid. 25: resolution of temporal grid, better to be half length of dynamic frames
                             }
-        self.multires = [1, 2, 4, 8]
-        self.no_dx=False
-        self.no_grid=False
-        self.no_ds=False
-        self.no_dr=False
-        self.no_do=True
-        self.no_dshs=True
-        self.empty_voxel=False
-        self.grid_pe=0
-        self.static_mlp=False
-        self.apply_rotation=False
+        self.multires = [1, 2, 4, 8] # multi resolution of voxel grid
+        self.no_dx=False # cancel the deformation of Gaussians' position
+        self.no_grid=False # cancel the spatial-temporal hexplane.
+        self.no_ds=False # cancel the deformation of Gaussians' scaling
+        self.no_dr=False # cancel the deformation of Gaussians' rotations
+        self.no_do=True # cancel the deformation of Gaussians' opacity
+        self.no_dshs=True # cancel the deformation of SH colors.
+        self.empty_voxel=False # useless
+        self.grid_pe=0 # useless, I was trying to add positional encoding to hexplane's features
+        self.static_mlp=False # useless
+        self.apply_rotation=False # useless
 
         
         super().__init__(parser, "ModelHiddenParams")
