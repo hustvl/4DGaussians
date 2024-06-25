@@ -134,13 +134,9 @@ class Load_hyper_data(Dataset):
         if idx in self.map.keys():
             return self.map[idx]
         camera = self.all_cam_params[idx]
-        # camera = self.video_path[idx]
         w = self.image_one.size[0]
         h = self.image_one.size[1]
-        # image = PILtoTorch(image,None)
-        # image = image.to(torch.float32)
         time = self.video_time[idx]
-        # .astype(np.float32)
         R = camera.orientation.T
         T = - camera.position @ R
         FovY = focal2fov(camera.focal_length, self.h)

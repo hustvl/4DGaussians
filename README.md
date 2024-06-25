@@ -25,9 +25,12 @@ Light Gaussian implementation: [This link](https://github.com/pablodawson/4DGaus
 
 
 ## News
+
+2024.6.25: we clean the code and add an explanation of the parameters.
+
 2024.3.25: Update guidance for hypernerf and dynerf dataset.
 
-2024.03.04: We change the hyperparameters of the Neu3D dataset, corresponding to our paper
+2024.03.04: We change the hyperparameters of the Neu3D dataset, corresponding to our paper.
 
 2024.02.28: Update SIBR viewer guidance.
 
@@ -89,7 +92,7 @@ Meanwhile, [Plenoptic Dataset](https://github.com/facebookresearch/Neural_3D_Vid
 ```
 
 **For multipleviews scenes:**
-If you want to train your own dataset of multipleviews scenes,you can orginize your dataset as follows:
+If you want to train your own dataset of multipleviews scenes, you can orginize your dataset as follows:
 
 ```
 ├── data
@@ -105,11 +108,11 @@ If you want to train your own dataset of multipleviews scenes,you can orginize y
 │     		  ├── ...
 │   	  | ...
 ```
-After that,you can use the  `multipleviewprogress.sh` we provided to generate related data of poses and pointcloud.You can use it as follows:
+After that, you can use the  `multipleviewprogress.sh` we provided to generate related data of poses and pointcloud.You can use it as follows:
 ```bash
 bash multipleviewprogress.sh (youe dataset name)
 ```
-You need to ensure that the data folder is orginized as follows after running multipleviewprogress.sh:
+You need to ensure that the data folder is organized as follows after running multipleviewprogress.sh:
 ```
 ├── data
 |   | multipleview
@@ -181,7 +184,7 @@ You can customize your training config through the config files.
 
 ## Checkpoint
 
-Also, you can training your model with checkpoint.
+Also, you can train your model with checkpoint.
 
 ```python
 python train.py -s data/dnerf/bouncingballs --port 6017 --expname "dnerf/bouncingballs" --configs arguments/dnerf/bouncingballs.py --checkpoint_iterations 200 # change it.
@@ -199,7 +202,7 @@ python train.py -s data/dnerf/bouncingballs --port 6017 --expname "dnerf/bouncin
 Run the following script to render the images.
 
 ```
-python render.py --model_path "output/dnerf/bouncingballs/"  --skip_train --configs arguments/dnerf/bouncingballs.py  &
+python render.py --model_path "output/dnerf/bouncingballs/"  --skip_train --configs arguments/dnerf/bouncingballs.py 
 ```
 
 ## Evaluation
@@ -297,11 +300,13 @@ We would like to express our sincere gratitude to [@zhouzhenghong-gt](https://gi
 Some insights about neural voxel grids and dynamic scenes reconstruction originate from [TiNeuVox](https://github.com/hustvl/TiNeuVox). If you find this repository/work helpful in your research, welcome to cite these papers and give a ⭐.
 
 ```
-@article{wu20234dgaussians,
-  title={4D Gaussian Splatting for Real-Time Dynamic Scene Rendering},
-  author={Wu, Guanjun and Yi, Taoran and Fang, Jiemin and Xie, Lingxi and Zhang, Xiaopeng and Wei Wei and Liu, Wenyu and Tian, Qi and Wang Xinggang},
-  journal={arXiv preprint arXiv:2310.08528},
-  year={2023}
+@InProceedings{Wu_2024_CVPR,
+    author    = {Wu, Guanjun and Yi, Taoran and Fang, Jiemin and Xie, Lingxi and Zhang, Xiaopeng and Wei, Wei and Liu, Wenyu and Tian, Qi and Wang, Xinggang},
+    title     = {4D Gaussian Splatting for Real-Time Dynamic Scene Rendering},
+    booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+    month     = {June},
+    year      = {2024},
+    pages     = {20310-20320}
 }
 
 @inproceedings{TiNeuVox,

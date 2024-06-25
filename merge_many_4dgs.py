@@ -161,6 +161,7 @@ def save_point_cloud(points, model_path, timestamp):
     pcd.points = o3d.utility.Vector3dVector(points)
     ply_path = os.path.join(output_path,f"points_{timestamp}.ply")
     o3d.io.write_point_cloud(ply_path, pcd)
+# This scripts can help you to merge many 4DGS.
 parser = ArgumentParser(description="Testing script parameters")
 model = ModelParams(parser, sentinel=True)
 pipeline = PipelineParams(parser)
@@ -228,5 +229,3 @@ for index, viewpoint in tqdm(enumerate(scene1.getVideoCameras())):
     torchvision.utils.save_image(result["render"],os.path.join(render_path,f"output_image{index}.png"))
     
 imageio.mimwrite(os.path.join(render_path, 'video_rgb.mp4'), render_images, fps=30, codec='libx265') 
-    # points = get_state_at_time(gaussians, viewpoint)
-    # save_point_cloud(points, args.model_path, index)

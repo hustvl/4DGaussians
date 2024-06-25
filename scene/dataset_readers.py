@@ -307,7 +307,6 @@ def read_timeline(path):
     timestamp_mapper = {}
     max_time_float = max(time_line)
     for index, time in enumerate(time_line):
-        # timestamp_mapper[time] = index
         timestamp_mapper[time] = time/max_time_float
 
     return timestamp_mapper, max_time_float
@@ -548,18 +547,12 @@ def readPanopticmeta(datadir, json_path):
         cam_ids = test_meta['cam_id'][index]
 
         time = index / len(test_meta['fn'])
-        # breakpoint()
         for focal, w2c, fn, cam in zip(focals, w2cs, fns, cam_ids):
             image_path = os.path.join(datadir,"ims")
             image_name=fn
-            
-            # breakpoint()
             image = Image.open(os.path.join(datadir,"ims",fn))
             im_data = np.array(image.convert("RGBA"))
-            # breakpoint()
             im_data = PILtoTorch(im_data,None)[:3,:,:]
-            # breakpoint()
-            # print(w2c,focal,image_name)
             camera = setup_camera(w, h, focal, w2c)
             cam_infos.append({
                 "camera":camera,
@@ -568,7 +561,6 @@ def readPanopticmeta(datadir, json_path):
             
     cam_centers = np.linalg.inv(test_meta['w2c'][0])[:, :3, 3]  # Get scene radius
     scene_radius = 1.1 * np.max(np.linalg.norm(cam_centers - np.mean(cam_centers, 0)[None], axis=-1))
-    # breakpoint()
     return cam_infos, max_time, scene_radius 
 
 def readPanopticSportsinfos(datadir):
