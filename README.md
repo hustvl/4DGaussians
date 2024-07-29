@@ -11,7 +11,7 @@
 
 <sup>\*</sup> Equal Contributions. <sup>$\ddagger$</sup> Project Lead. <sup>✉</sup> Corresponding Author.
 
----
+
 
 ![block](assets/teaserfig.jpg)
 Our method converges very quickly and achieves real-time rendering speed.
@@ -264,13 +264,19 @@ In my paper, I always use `colmap.sh` to generate dense point clouds and downsam
 
 Here are some codes maybe useful but never adopted in my paper, you can also try it.
 
-## Further works
+## Awesome Concurrent/Related Works
 
-We sincerely thank the authors and their fantastic works for other applications based on our code.
+Welcome to also check out these awesome concurrent/related works, including but not limited to
+
+[Deformable 3D Gaussians for High-Fidelity Monocular Dynamic Scene Reconstruction](https://ingra14m.github.io/Deformable-Gaussians/)
+
+[SC-GS: Sparse-Controlled Gaussian Splatting for Editable Dynamic Scenes](https://yihua7.github.io/SC-GS-web/)
 
 [MD-Splatting: Learning Metric Deformation from 4D Gaussians in Highly Deformable Scenes](https://md-splatting.github.io/)
 
 [4DGen: Grounded 4D Content Generation with Spatial-temporal Consistency](https://vita-group.github.io/4DGen/)
+
+[Diffusion4D: Fast Spatial-temporal Consistent 4D Generation via Video Diffusion Models](https://github.com/VITA-Group/Diffusion4D)
 
 [DreamGaussian4D: Generative 4D Gaussian Splatting](https://github.com/jiawei-ren/dreamgaussian4d)
 
@@ -281,15 +287,13 @@ We sincerely thank the authors and their fantastic works for other applications 
 [Endo-4DGS: Endoscopic Monocular Scene Reconstruction with 4D Gaussian Splatting](https://arxiv.org/abs/2401.16416)
 
 
----
 
 ## Contributions
 
 **This project is still under development. Please feel free to raise issues or submit pull requests to contribute to our codebase.**
 
----
 
-Some source code of ours is borrowed from [3DGS](https://github.com/graphdeco-inria/gaussian-splatting), [k-planes](https://github.com/Giodiro/kplanes_nerfstudio),[HexPlane](https://github.com/Caoang327/HexPlane), [TiNeuVox](https://github.com/hustvl/TiNeuVox). We sincerely appreciate the excellent works of these authors.
+Some source code of ours is borrowed from [3DGS](https://github.com/graphdeco-inria/gaussian-splatting), [K-planes](https://github.com/Giodiro/kplanes_nerfstudio), [HexPlane](https://github.com/Caoang327/HexPlane), [TiNeuVox](https://github.com/hustvl/TiNeuVox), [Depth-Rasterization](https://github.com/ingra14m/depth-diff-gaussian-rasterization). We sincerely appreciate the excellent works of these authors.
 
 ## Acknowledgement
 
