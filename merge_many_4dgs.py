@@ -105,7 +105,9 @@ def render(viewpoint_camera, gaussians, bg_color : torch.Tensor, scaling_modifie
     for index, pc in enumerate(gaussians):
         
         means3D_final1, scales_final1, rotations_final1, opacity_final1, shs_final1 = get_state_at_time(pc, viewpoint_camera)
-
+        scales_final1 = pc.scaling_activation(scales_final1)
+        rotations_final1 = pc.rotation_activation(rotations_final1)
+        opacity_final1 = pc.opacity_activation(opacity_final1)
         if index == 0:
             means3D_final, scales_final, rotations_final, opacity_final, shs_final = means3D_final1, scales_final1, rotations_final1, opacity_final1, shs_final1
         else:
@@ -159,6 +161,7 @@ def save_point_cloud(points, model_path, timestamp):
     pcd.points = o3d.utility.Vector3dVector(points)
     ply_path = os.path.join(output_path,f"points_{timestamp}.ply")
     o3d.io.write_point_cloud(ply_path, pcd)
+# This scripts can help you to merge many 4DGS.
 parser = ArgumentParser(description="Testing script parameters")
 model = ModelParams(parser, sentinel=True)
 pipeline = PipelineParams(parser)
@@ -226,5 +229,3 @@ for index, viewpoint in tqdm(enumerate(scene1.getVideoCameras())):
     torchvision.utils.save_image(result["render"],os.path.join(render_path,f"output_image{index}.png"))
     
 imageio.mimwrite(os.path.join(render_path, 'video_rgb.mp4'), render_images, fps=30, codec='libx265') 
-    # points = get_state_at_time(gaussians, viewpoint)
-    # save_point_cloud(points, args.model_path, index)

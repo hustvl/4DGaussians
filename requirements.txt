@@ -5,3 +5,4 @@ lpips
 plyfile
 pytorch_msssim
 open3d
+imageio[ffmpeg]

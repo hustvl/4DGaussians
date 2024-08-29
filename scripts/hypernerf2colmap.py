@@ -41,7 +41,6 @@ for jsonfile in tqdm(cameras):
 image_size = cams[0]['image_size']
 image = Image.open(os.path.join(image_dir,images[0]))
 size = image.size
-# breakpoint()
 object_images_file = open(os.path.join(colmap_dir,"images.txt"),"w")
 object_cameras_file = open(os.path.join(colmap_dir,"cameras.txt"),"w")
 
@@ -50,19 +49,13 @@ cnt=0
 sizes=2
 while len(cams)//sizes > 200:
     sizes += 1
-# breakpoint()
 for cam, image in zip(cams, images):
     cnt+=1
 
-    # print(image)
-    # breakpoint()
     if cnt %  sizes != 0:
         continue
-    # print("begin to write")
     R = np.array(cam['orientation']).T
-    # breakpoint()
     T = -np.array(cam['position'])@R 
-    # T = -np.matmul(R,T)
     
     T = [str(i) for i in T]
     qevc = [str(i) for i in rotmat2qvec(R.T)]
@@ -73,7 +66,6 @@ for cam, image in zip(cams, images):
     shutil.copy(os.path.join(image_dir,image),os.path.join(imagecolmap_dir,image))
 print(idx)
 # write camera infomation.
-# print(1,"SIMPLE_PINHOLE",image_size[0],image_size[1],focal[0],image_sizep0/2,image_size[1]/2,file=object_cameras_file)
 object_point_file = open(os.path.join(colmap_dir,"points3D.txt"),"w")
 
 object_cameras_file.close()
