@@ -17,7 +17,7 @@ pip install -e submodules/simple-knn
 ```
 
 Our test setup was:
-- Ubuntu 22.04: 'pytorch: 1.13.1+cu117'
+- Ubuntu 22.04: `pytorch: 1.13.1+cu117`
 
 ## Data Preparation
 
