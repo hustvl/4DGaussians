@@ -21,7 +21,7 @@ Our test setup was:
 
 ## Data Preparation
 
-**For multipleviews scenes:**
+**Custom Datasets:**
 Orginize your dataset as follows:
 
 ```
