@@ -16,7 +16,8 @@ pip install -e submodules/depth-diff-gaussian-rasterization
 pip install -e submodules/simple-knn
 ```
 
-In our environment, we use pytorch=1.13.1+cu116.
+Our test setup was:
+- Ubuntu 22.04: 'pytorch: 1.13.1+cu117'
 
 ## Data Preparation
 
