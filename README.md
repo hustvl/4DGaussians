@@ -1,4 +1,7 @@
-# 4D Gaussian Splatting for Real-Time Dynamic Scene Rendering
+# Performance Evaluation of 4D Gaussian Splatting Algorithm in Various Scenarios
+
+## Project Summary
+In this project, the performance of the 4D Gaussian Splitting algorithm, a technology for dynamic scene rendering, was evaluated in various scenarios. Qualitative and quantitative evaluations were conducted for various scenarios of the dataset, and the performance and practical application potential of 4D Gaussian Splitting were analyzed through this process.
 
 ## Environmental Setups
 
