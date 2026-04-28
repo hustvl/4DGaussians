@@ -1,3 +1,5 @@
+from PIL import Image as PILImage
+
 from torch.utils.data import Dataset
 from scene.cameras import Camera
 import numpy as np
@@ -17,7 +19,6 @@ class FourDGSdataset(Dataset):
         self.args = args
         self.dataset_type=dataset_type
     def __getitem__(self, index):
-        # breakpoint()
 
         if self.dataset_type != "PanopticSports":
             try:
@@ -28,13 +29,17 @@ class FourDGSdataset(Dataset):
                 mask=None
             except:
                 caminfo = self.dataset[index]
-                image = caminfo.image
+                if caminfo.image is not None:
+                    image = caminfo.image
+                else:
+                    # lazy_load: load image from disk on demand
+                    image = PILtoTorch(PILImage.open(caminfo.image_path), None)
                 R = caminfo.R
                 T = caminfo.T
                 FovX = caminfo.FovX
                 FovY = caminfo.FovY
                 time = caminfo.time
-    
+
                 mask = caminfo.mask
             return Camera(colmap_id=index,R=R,T=T,FoVx=FovX,FoVy=FovY,image=image,gt_alpha_mask=None,
                               image_name=f"{index}",uid=index,data_device=torch.device("cuda"),time=time,
@@ -42,5 +47,5 @@ class FourDGSdataset(Dataset):
         else:
             return self.dataset[index]
     def __len__(self):
-        
+
         return len(self.dataset)
