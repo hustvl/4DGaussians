@@ -108,6 +108,34 @@ If you want to train your own dataset of multipleviews scenes, you can orginize 
 │     		  ├── ...
 │   	  | ...
 ```
+If your custom multipleview capture starts as synchronized iPhone or GoPro videos, convert and validate them first:
+
+```yaml
+# captures/redzone_poc/manifest.yaml
+scene_name: redzone_poc
+output_dir: data/multipleview/redzone_poc
+target_fps: 30
+image_ext: jpg
+
+cameras:
+  - id: cam01
+    video: iphone_01.mov
+    sync_offset_seconds: 0.00
+  - id: cam02
+    video: iphone_02.mov
+    sync_offset_seconds: 0.37
+```
+
+```bash
+# Check metadata, sync windows, and expected frame counts before extraction.
+python scripts/prepare_multicam_dataset.py --manifest captures/redzone_poc/manifest.yaml --validate-only
+
+# Extract frames into data/multipleview/redzone_poc/camXX/frame_00001.jpg.
+python scripts/prepare_multicam_dataset.py --manifest captures/redzone_poc/manifest.yaml
+```
+
+The converter requires `ffmpeg` and `ffprobe`, and writes `dataset_report.json` and `dataset_report.md` in the output folder.
+
 After that, you can use the  `multipleviewprogress.sh` we provided to generate related data of poses and pointcloud.You can use it as follows:
 ```bash
 bash multipleviewprogress.sh (youe dataset name)
